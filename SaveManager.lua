@@ -5,20 +5,16 @@ local SaveManager = {}
 SaveManager.__index = SaveManager
 
 local HttpService = game:GetService("HttpService")
-
 local Library = nil
-local Config = {}
 
-function SaveManager:SetLibrary(lib)
-    Library = lib
-    return self
-end
+function SaveManager:SetLibrary(lib) Library = lib; return self end
 
 function SaveManager:SetFolder(name)
     self._folder = name
-    if not isfolder then return self end
-    if not isfolder(name) then makefolder(name) end
-    if not isfolder(name .. "/configs") then makefolder(name .. "/configs") end
+    if isfolder then
+        if not isfolder(name) then makefolder(name) end
+        if not isfolder(name .. "/configs") then makefolder(name .. "/configs") end
+    end
     return self
 end
 
@@ -57,9 +53,7 @@ function SaveManager:Load(name)
         end
         return
     end
-    local ok, decoded = pcall(function()
-        return HttpService:JSONDecode(readfile(path))
-    end)
+    local ok, decoded = pcall(function() return HttpService:JSONDecode(readfile(path)) end)
     if not ok then return end
     for k, v in pairs(decoded) do
         if type(v) == "table" and v.__type == "Color3" then
@@ -84,20 +78,18 @@ function SaveManager:BuildConfigSection(tab)
         Placeholder = "default",
     })
     box:AddButton("💾 Save Config", function()
-        local name = (Library._configFlags.SaveConfigName or "default")
-        SaveManager:Save(name)
+        SaveManager:Save(Library._configFlags.SaveConfigName or "default")
     end)
     box:AddButton("📂 Load Config", function()
-        local name = (Library._configFlags.SaveConfigName or "default")
-        SaveManager:Load(name)
+        SaveManager:Load(Library._configFlags.SaveConfigName or "default")
     end)
     box:AddButton("🗑️ Delete Config", function()
-        local name = (Library._configFlags.SaveConfigName or "default")
-        local path = (SaveManager._folder or "MawwwHub/configs") .. "/" .. name .. ".json"
-        if delfile and isfile(path) then
+        local n = Library._configFlags.SaveConfigName or "default"
+        local path = (SaveManager._folder or "MawwwHub/configs") .. "/" .. n .. ".json"
+        if delfile and isfile and isfile(path) then
             delfile(path)
             if Library.Notify then
-                Library:Notify({ Title = "Deleted", Content = "Config: " .. name, Duration = 3 })
+                Library:Notify({ Title = "Deleted", Content = "Config: " .. n, Duration = 3 })
             end
         end
     end)

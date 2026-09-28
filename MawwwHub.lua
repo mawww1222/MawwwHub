@@ -29,11 +29,11 @@ local ASSETS = {
 --========================================================--
 -- THEME
 --========================================================--
-Library.Scheme.AccentColor     = Color3.fromRGB(180, 110, 255)
-Library.Scheme.BackgroundColor = Color3.fromRGB(12, 8, 18)
-Library.Scheme.MainColor       = Color3.fromRGB(28, 22, 38)
-Library.Scheme.OutlineColor    = Color3.fromRGB(180, 110, 255)
-Library.Scheme.FontColor       = Color3.fromRGB(240, 240, 245)
+Library.Scheme.AccentColor     = Color3.fromRGB(70, 130, 220)
+Library.Scheme.BackgroundColor = Color3.fromRGB(8, 14, 28)
+Library.Scheme.MainColor       = Color3.fromRGB(18, 28, 50)
+Library.Scheme.OutlineColor    = Color3.fromRGB(70, 130, 220)
+Library.Scheme.FontColor       = Color3.fromRGB(230, 238, 250)
 
 local Palette = {
     Purple = Color3.fromRGB(180, 110, 255),

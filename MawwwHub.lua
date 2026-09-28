@@ -79,13 +79,14 @@ local function CreateToggleMenu(IconId)
 
     local Grad = Instance.new("UIGradient")
     Grad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0.00, Palette.Purple),
-        ColorSequenceKeypoint.new(0.25, Palette.Pink),
-        ColorSequenceKeypoint.new(0.50, Palette.Cyan),
-        ColorSequenceKeypoint.new(0.75, Palette.Green),
-        ColorSequenceKeypoint.new(1.00, Palette.Purple),
-    })
-    Grad.Rotation = 45; Grad.Parent = Stroke
+      ColorSequenceKeypoint.new(0.00, Color3.fromRGB(60, 120, 255)),   -- biru tua
+      ColorSequenceKeypoint.new(0.25, Color3.fromRGB(80, 170, 255)),   -- biru medium
+      ColorSequenceKeypoint.new(0.50, Color3.fromRGB(120, 210, 255)),  -- biru terang
+      ColorSequenceKeypoint.new(0.75, Color3.fromRGB(80, 170, 255)),   -- biru medium
+      ColorSequenceKeypoint.new(1.00, Color3.fromRGB(60, 120, 255)),   -- biru tua
+   })
+   Grad.Rotation = 45
+   Grad.Parent = Stroke
 
     local Icon = Instance.new("ImageLabel")
     Icon.Size = UDim2.fromScale(0.7, 0.7); Icon.Position = UDim2.fromScale(0.15, 0.15)

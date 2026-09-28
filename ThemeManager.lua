@@ -12,6 +12,13 @@ local Themes = {
         OutlineColor    = Color3.fromRGB(180, 110, 255),
         FontColor       = Color3.fromRGB(240, 240, 245),
     },
+    Blue = {
+        AccentColor     = Color3.fromRGB(80, 170, 255),
+        BackgroundColor = Color3.fromRGB(8, 14, 26),
+        MainColor       = Color3.fromRGB(20, 32, 52),
+        OutlineColor    = Color3.fromRGB(80, 170, 255),
+        FontColor       = Color3.fromRGB(235, 242, 255),
+    },
     Pink = {
         AccentColor     = Color3.fromRGB(255, 105, 180),
         BackgroundColor = Color3.fromRGB(20, 8, 15),

@@ -1,11 +1,11 @@
 --========================================================--
--- MAWWWHUB • COLORFUL EDITION • MOBILE + PC --
+-- MAWWWHUB • COLORFUL EDITION • COMPACT UI
 --========================================================--
 local BASE = "https://raw.githubusercontent.com/mawww1222/MawwwHub/main/"
 
-local Library      = loadstring(game:HttpGet(BASE .. "Library.lua"))()
-local ThemeManager = loadstring(game:HttpGet(BASE .. "ThemeManager.lua"))()
-local SaveManager  = loadstring(game:HttpGet(BASE .. "SaveManager.lua"))()
+local Library      = loadstring(game:HttpGet(BASE .. "Library.lua?t=" .. tick()))()
+local ThemeManager = loadstring(game:HttpGet(BASE .. "ThemeManager.lua?t=" .. tick()))()
+local SaveManager  = loadstring(game:HttpGet(BASE .. "SaveManager.lua?t=" .. tick()))()
 
 local Players          = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -66,15 +66,15 @@ local function CreateToggleMenu(IconId)
     local MainButton = Instance.new("TextButton")
     MainButton.Text = ""
     MainButton.AutoButtonColor = false
-    MainButton.Size = UDim2.fromOffset(48, 48)
+    MainButton.Size = UDim2.fromOffset(42, 42)
     MainButton.Position = UDim2.fromOffset(15, 120)
     MainButton.BackgroundColor3 = Color3.fromRGB(24, 16, 34)
     MainButton.BackgroundTransparency = 0.05
     MainButton.Parent = ScreenGui
 
-    local Corner = Instance.new("UICorner") Corner.CornerRadius = UDim.new(0, 12) Corner.Parent = MainButton
+    local Corner = Instance.new("UICorner") Corner.CornerRadius = UDim.new(0, 10) Corner.Parent = MainButton
     local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Palette.Purple; Stroke.Thickness = 1.8
+    Stroke.Color = Palette.Purple; Stroke.Thickness = 1.6
     Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; Stroke.Parent = MainButton
 
     local Grad = Instance.new("UIGradient")
@@ -106,13 +106,10 @@ local Window = Library:CreateWindow({
     Title = "MawwwHub",
     Footer = "MawwwHub • Colorful Edition",
     Icon = ASSETS.ToggleIcon,
-    IconSize = UDim2.fromOffset(40, 40),
     CornerRadius = 8,
     NotifySide = "Right",
     ShowCustomCursor = true,
-    ShowMobileButtons = false,
     ToggleKeybind = Enum.KeyCode.LeftControl,
-    Size = UDim2.fromOffset(520, 360),
 })
 
 --========================================================--
@@ -129,44 +126,34 @@ local Tabs = {
 }
 
 --========================================================--
--- HOME TAB
+-- HOME
 --========================================================--
 local HomeLeft  = Tabs.Home:AddLeftGroupbox("Welcome", "sparkles")
 local HomeRight = Tabs.Home:AddRightGroupbox("Info", "info")
 
-HomeLeft:AddImage(ASSETS.HomeBanner, { Text = "", Height = 180 })
+HomeLeft:AddImage(ASSETS.HomeBanner, { Text = "", Height = 140 })
 HomeLeft:AddLabel("✨ Selamat datang di MawwwHub ✨"):AddColor(Color3.fromRGB(255, 200, 255))
-HomeLeft:AddLabel("UI dibuat dengan Library Custom"):AddColor(Color3.fromRGB(200, 200, 255))
+HomeLeft:AddLabel("UI Colorful Edition"):AddColor(Color3.fromRGB(200, 200, 255))
 HomeLeft:AddLabel("Discord: MawwwHub#0001"):AddColor(Color3.fromRGB(180, 220, 255))
 
 HomeRight:AddLabel("UI Settings"):AddColor(Palette.Cyan)
 HomeRight:AddDivider()
-
 HomeRight:AddToggle("HomeUICustomCursor", {
-    Text = "Custom Cursor",
-    Default = true,
+    Text = "Custom Cursor", Default = true,
     Callback = function(v) Library.ShowCustomCursor = v end,
 })
-
 HomeRight:AddDropdown("HomeNotifySide", {
     Text = "Notification Side",
-    Values = { "Left", "Right" },
-    Default = "Right",
-    Multi = false,
+    Values = { "Left", "Right" }, Default = "Right", Multi = false,
     Callback = function(v) Library:SetNotifySide(v) end,
 })
-
 HomeRight:AddDropdown("HomeTheme", {
     Text = "Theme Preset",
-    Values = { "Default", "Pink", "Cyan", "Dark" },
-    Default = "Default",
-    Multi = false,
+    Values = { "Default", "Pink", "Cyan", "Dark" }, Default = "Default", Multi = false,
     Callback = function(v)
-        ThemeManager:SetLibrary(Library)
-        ThemeManager:SetTheme(v)
+        ThemeManager:SetLibrary(Library); ThemeManager:SetTheme(v)
     end,
 })
-
 HomeRight:AddDivider()
 HomeRight:AddButton("📋 Copy Discord Tag", function()
     if setclipboard then setclipboard("MawwwHub#0001") end
@@ -175,12 +162,10 @@ end)
 HomeRight:AddButton("🔄 Rejoin Server", function()
     TeleportService:Teleport(game.PlaceId)
 end)
-HomeRight:AddButton("❌ Unload MawwwHub", function()
-    Library:Unload()
-end)
+HomeRight:AddButton("❌ Unload MawwwHub", function() Library:Unload() end)
 
 --========================================================--
--- PLAYER TAB
+-- PLAYER
 --========================================================--
 local PlayerMain  = Tabs.Player:AddLeftGroupbox("Character", "user")
 local PlayerExtra = Tabs.Player:AddRightGroupbox("Extras", "sparkles")
@@ -195,7 +180,7 @@ PlayerExtra:AddToggle("AntiAFK", { Text = "Anti AFK", Default = false, Callback 
 PlayerExtra:AddToggle("GodMode", { Text = "God Mode", Default = false, Callback = function(v) _G.Mawww_GodMode = v end })
 
 --========================================================--
--- VISUALS TAB
+-- VISUALS
 --========================================================--
 local ESPMain = Tabs.Visuals:AddLeftGroupbox("ESP", "scan-eye")
 local ESPOpts = Tabs.Visuals:AddRightGroupbox("Options", "settings")
@@ -211,7 +196,7 @@ ESPOpts:AddSlider("ESPRadius", { Text = "ESP Radius", Default = 500, Min = 50, M
 ESPOpts:AddSlider("ESPTransparency", { Text = "Transparency", Default = 0.3, Min = 0, Max = 1, Rounding = 2, Callback = function(v) _G.Mawww_ESP_Transparency = v end })
 
 --========================================================--
--- COMBAT TAB
+-- COMBAT
 --========================================================--
 local CombatMain = Tabs.Combat:AddLeftGroupbox("Combat", "swords")
 local CombatAim  = Tabs.Combat:AddRightGroupbox("Aim Assist", "crosshair")
@@ -228,7 +213,7 @@ CombatAim:AddSlider("SilentAimFOV", { Text = "FOV", Default = 250, Min = 50, Max
 CombatAim:AddDropdown("SilentAimPart", { Text = "Target Part", Values = { "Head", "HumanoidRootPart", "Torso" }, Default = "Head", Multi = false, Callback = function(v) _G.Mawww_SilentAim_Part = v end })
 
 --========================================================--
--- MOVEMENT TAB
+-- MOVEMENT
 --========================================================--
 local MoveMain     = Tabs.Movement:AddLeftGroupbox("Movement", "move")
 local MoveTeleport = Tabs.Movement:AddRightGroupbox("Teleport", "navigation")
@@ -262,22 +247,19 @@ MoveTeleport:AddButton("🚀 Teleport to Mouse", function()
 end)
 
 --========================================================--
--- SCRIPTS TAB
+-- SCRIPTS
 --========================================================--
 local ScriptsBox   = Tabs.Scripts:AddLeftGroupbox("Script Loader", "code")
 local ScriptsQuick = Tabs.Scripts:AddRightGroupbox("Quick Load", "zap")
 
 ScriptsBox:AddInput("ScriptURL", {
-    Text = "Script URL",
-    Default = "",
+    Text = "Script URL", Default = "",
     Placeholder = "https://... (raw lua)",
     Callback = function(v) _G.Mawww_ScriptURL = v end,
 })
 ScriptsBox:AddButton("▶️ Execute Script", function()
     if _G.Mawww_ScriptURL and _G.Mawww_ScriptURL ~= "" then
-        local ok, err = pcall(function()
-            loadstring(game:HttpGet(_G.Mawww_ScriptURL))()
-        end)
+        local ok, err = pcall(function() loadstring(game:HttpGet(_G.Mawww_ScriptURL))() end)
         if ok then
             Library:Notify({ Title = "Success", Content = "Script dijalankan!", Duration = 3 })
         else
@@ -301,7 +283,7 @@ ScriptsQuick:AddButton("🔧 IY Admin Commands", function()
 end)
 
 --========================================================--
--- MISC TAB
+-- MISC
 --========================================================--
 local MiscCamera = Tabs.Misc:AddLeftGroupbox("Camera", "camera")
 local MiscFun    = Tabs.Misc:AddRightGroupbox("Fun", "smile")
@@ -326,24 +308,22 @@ end)
 MiscFun:AddToggle("JerkTool", { Text = "Jerk Tool", Default = false, Callback = function(v) _G.Mawww_JerkTool = v end })
 
 --========================================================--
--- COLORFUL STROKE UNTUK SEMUA TOMBOL
+-- COLORFUL STROKE
 --========================================================--
 local function PaintButtons(container)
     if not container then return end
     task.spawn(function()
         for _, d in ipairs(container:GetDescendants()) do
-            if d:IsA("GuiButton") then
-                if not d:FindFirstChildOfClass("UIStroke") then
-                    local s = Instance.new("UIStroke")
-                    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                    s.Thickness = 1.3
-                    s.Color = NextColor()
-                    s.Parent = d
-                    local g = Instance.new("UIGradient")
-                    g.Color = ColorSequence.new(NextColor(), NextColor())
-                    g.Rotation = 45
-                    g.Parent = s
-                end
+            if d:IsA("GuiButton") and not d:FindFirstChildOfClass("UIStroke") then
+                local s = Instance.new("UIStroke")
+                s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                s.Thickness = 1.3
+                s.Color = NextColor()
+                s.Parent = d
+                local g = Instance.new("UIGradient")
+                g.Color = ColorSequence.new(NextColor(), NextColor())
+                g.Rotation = 45
+                g.Parent = s
             end
         end
     end)
@@ -352,7 +332,7 @@ end
 PaintButtons(Window.Gui)
 
 --========================================================--
--- THEME & SAVE MANAGER
+-- MANAGERS
 --========================================================--
 ThemeManager:SetLibrary(Library)
 ThemeManager:SetFolder("MawwwHub")
@@ -361,14 +341,8 @@ SaveManager:SetLibrary(Library)
 SaveManager:SetFolder("MawwwHub")
 SaveManager:BuildConfigSection(Tabs.Home)
 
---========================================================--
--- FINAL
---========================================================--
 print("====================================")
-print(" MAWWWHUB • COLORFUL EDITION")
-print(" Toggle Icon : " .. ASSETS.ToggleIcon)
-print(" Home Banner : " .. ASSETS.HomeBanner)
-print(" Home / Player / Visuals / Combat")
-print(" Movement / Scripts / Misc  : READY")
-print(" Toggle Key  : LeftControl")
+print(" MAWWWHUB • COMPACT EDITION")
+print(" Window : " .. tostring(Window.Main.AbsoluteSize))
+print(" Toggle : LeftControl")
 print("====================================")

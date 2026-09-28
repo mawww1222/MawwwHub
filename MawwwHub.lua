@@ -1,5 +1,5 @@
 --========================================================--
--- MAWWWHUB • COLORFUL EDITION • COMPACT UI
+-- MAWWWHUB • COLORFUL EDITION • 560x380
 --========================================================--
 local BASE = "https://raw.githubusercontent.com/mawww1222/MawwwHub/main/"
 
@@ -100,7 +100,7 @@ end
 CreateToggleMenu(ASSETS.ToggleIcon)
 
 --========================================================--
--- WINDOW
+-- WINDOW (560 x 380 px)
 --========================================================--
 local Window = Library:CreateWindow({
     Title = "MawwwHub",
@@ -108,7 +108,7 @@ local Window = Library:CreateWindow({
     Icon = ASSETS.ToggleIcon,
     CornerRadius = 8,
     NotifySide = "Right",
-    ShowCustomCursor = true,
+    ShowCustomCursor = false,
     ToggleKeybind = Enum.KeyCode.LeftControl,
 })
 
@@ -139,8 +139,12 @@ HomeLeft:AddLabel("Discord: MawwwHub#0001"):AddColor(Color3.fromRGB(180, 220, 25
 HomeRight:AddLabel("UI Settings"):AddColor(Palette.Cyan)
 HomeRight:AddDivider()
 HomeRight:AddToggle("HomeUICustomCursor", {
-    Text = "Custom Cursor", Default = true,
-    Callback = function(v) Library.ShowCustomCursor = v end,
+    Text = "Custom Cursor (PC only)",
+    Default = false,
+    Callback = function(v)
+        Library.ShowCustomCursor = v
+        Library.RefreshCursor()
+    end,
 })
 HomeRight:AddDropdown("HomeNotifySide", {
     Text = "Notification Side",
@@ -342,7 +346,6 @@ SaveManager:SetFolder("MawwwHub")
 SaveManager:BuildConfigSection(Tabs.Home)
 
 print("====================================")
-print(" MAWWWHUB • COMPACT EDITION")
-print(" Window : " .. tostring(Window.Main.AbsoluteSize))
+print(" MAWWWHUB • 560 x 380")
 print(" Toggle : LeftControl")
 print("====================================")

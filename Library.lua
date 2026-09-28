@@ -15,12 +15,11 @@ local Player = Players.LocalPlayer
 --========================================================--
 -- SCHEME
 --========================================================--
-Library.Scheme = {
-    AccentColor     = Color3.fromRGB(180, 110, 255),
-    BackgroundColor = Color3.fromRGB(12, 8, 18),
-    MainColor       = Color3.fromRGB(28, 22, 38),
-    OutlineColor    = Color3.fromRGB(180, 110, 255),
-    FontColor       = Color3.fromRGB(240, 240, 245),
+Library.Scheme.AccentColor     = Color3.fromRGB(80, 170, 255)     -- biru terang
+Library.Scheme.BackgroundColor = Color3.fromRGB(8, 14, 26)        -- biru gelap
+Library.Scheme.MainColor       = Color3.fromRGB(20, 32, 52)       -- biru medium
+Library.Scheme.OutlineColor    = Color3.fromRGB(80, 170, 255)     -- biru sama accent
+Library.Scheme.FontColor       = Color3.fromRGB(235, 242, 255)    -- putih kebiruan
 }
 Library.ShowCustomCursor = false
 Library.NotifySide       = "Right"

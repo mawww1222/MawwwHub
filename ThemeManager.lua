@@ -4,9 +4,6 @@
 local ThemeManager = {}
 ThemeManager.__index = ThemeManager
 
-local HttpService = game:GetService("HttpService")
-
-local Library = nil
 local Themes = {
     Default = {
         AccentColor     = Color3.fromRGB(180, 110, 255),
@@ -38,15 +35,11 @@ local Themes = {
     },
 }
 
-function ThemeManager:SetLibrary(lib)
-    Library = lib
-    return self
-end
+local Library = nil
 
-function ThemeManager:SetFolder(name)
-    self._folder = name
-    return self
-end
+function ThemeManager:SetLibrary(lib) Library = lib; return self end
+function ThemeManager:SetFolder(name) self._folder = name; return self end
+function ThemeManager:GetThemes() return Themes end
 
 function ThemeManager:SetTheme(name)
     if Themes[name] and Library then
@@ -58,10 +51,6 @@ function ThemeManager:SetTheme(name)
         end
     end
     return self
-end
-
-function ThemeManager:GetThemes()
-    return Themes
 end
 
 return ThemeManager

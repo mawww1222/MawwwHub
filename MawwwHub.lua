@@ -135,7 +135,7 @@ local HomeRight = Tabs.Home:AddRightGroupbox("Info", "info")
 HomeLeft:AddImage(ASSETS.HomeBanner, { Text = "", Height = 140 })
 HomeLeft:AddLabel("✨ Selamat datang di MawwwHub ✨"):AddColor(Color3.fromRGB(255, 200, 255))
 HomeLeft:AddLabel("UI Colorful Edition"):AddColor(Color3.fromRGB(200, 200, 255))
-HomeLeft:AddLabel("Discord: MawwwHub#0001"):AddColor(Color3.fromRGB(180, 220, 255))
+HomeLeft:AddLabel("Link discord: https://discord.gg/h2D4xkkJW"):AddColor(Color3.fromRGB(180, 220, 255))
 
 HomeRight:AddLabel("UI Settings"):AddColor(Palette.Cyan)
 HomeRight:AddDivider()

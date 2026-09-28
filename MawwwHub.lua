@@ -160,7 +160,7 @@ HomeRight:AddDropdown("HomeTheme", {
 })
 HomeRight:AddDivider()
 HomeRight:AddButton("📋 Copy Discord Tag", function()
-    if setclipboard then setclipboard("MawwwHub#0001") end
+    if setclipboard then setclipboard("https://discord.gg/h2D4xkkJW") end
     Library:Notify({ Title = "Copied", Content = "Discord tag disalin!", Duration = 3 })
 end)
 HomeRight:AddButton("🔄 Rejoin Server", function()

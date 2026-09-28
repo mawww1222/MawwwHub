@@ -153,7 +153,7 @@ HomeRight:AddDropdown("HomeNotifySide", {
 })
 HomeRight:AddDropdown("HomeTheme", {
     Text = "Theme Preset",
-    Values = { "Default", "Pink", "Cyan", "Dark" }, Default = "Default", Multi = false,
+    Values = { "Default", "Pink", "Cyan", "Dark", "Blue" }, Default = "Default", Multi = false,
     Callback = function(v)
         ThemeManager:SetLibrary(Library); ThemeManager:SetTheme(v)
     end,

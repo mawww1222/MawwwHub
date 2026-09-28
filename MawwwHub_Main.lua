@@ -1,5 +1,5 @@
 --========================================================--
--- MAWWWHUB MAIN SCRIPT • COLORFUL EDITION • 560x380
+-- MAWWWHUB MAIN SCRIPT • BLUE EDITION • 560x380
 -- File: MawwwHub_Main.lua
 --========================================================--
 local BASE = "https://raw.githubusercontent.com/mawww1222/MawwwHub/main/"
@@ -28,13 +28,13 @@ local ASSETS = {
 }
 
 --========================================================--
--- THEME
+-- THEME (BLUE)
 --========================================================--
-Library.Scheme.AccentColor     = Color3.fromRGB(180, 110, 255)
-Library.Scheme.BackgroundColor = Color3.fromRGB(12, 8, 18)
-Library.Scheme.MainColor       = Color3.fromRGB(28, 22, 38)
-Library.Scheme.OutlineColor    = Color3.fromRGB(180, 110, 255)
-Library.Scheme.FontColor       = Color3.fromRGB(240, 240, 245)
+Library.Scheme.AccentColor     = Color3.fromRGB(80, 170, 255)
+Library.Scheme.BackgroundColor = Color3.fromRGB(8, 14, 26)
+Library.Scheme.MainColor       = Color3.fromRGB(20, 32, 52)
+Library.Scheme.OutlineColor    = Color3.fromRGB(80, 170, 255)
+Library.Scheme.FontColor       = Color3.fromRGB(235, 242, 255)
 
 local Palette = {
     Purple = Color3.fromRGB(180, 110, 255),
@@ -69,22 +69,22 @@ local function CreateToggleMenu(IconId)
     MainButton.AutoButtonColor = false
     MainButton.Size = UDim2.fromOffset(42, 42)
     MainButton.Position = UDim2.fromOffset(15, 120)
-    MainButton.BackgroundColor3 = Color3.fromRGB(24, 16, 34)
+    MainButton.BackgroundColor3 = Color3.fromRGB(20, 32, 52)
     MainButton.BackgroundTransparency = 0.05
     MainButton.Parent = ScreenGui
 
     local Corner = Instance.new("UICorner") Corner.CornerRadius = UDim.new(0, 10) Corner.Parent = MainButton
     local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Palette.Purple; Stroke.Thickness = 1.6
+    Stroke.Color = Palette.Blue; Stroke.Thickness = 1.6
     Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; Stroke.Parent = MainButton
 
     local Grad = Instance.new("UIGradient")
     Grad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0.00, Palette.Purple),
-        ColorSequenceKeypoint.new(0.25, Palette.Pink),
-        ColorSequenceKeypoint.new(0.50, Palette.Cyan),
-        ColorSequenceKeypoint.new(0.75, Palette.Green),
-        ColorSequenceKeypoint.new(1.00, Palette.Purple),
+        ColorSequenceKeypoint.new(0.00, Palette.Blue),
+        ColorSequenceKeypoint.new(0.25, Palette.Cyan),
+        ColorSequenceKeypoint.new(0.50, Palette.Purple),
+        ColorSequenceKeypoint.new(0.75, Palette.Blue),
+        ColorSequenceKeypoint.new(1.00, Palette.Cyan),
     })
     Grad.Rotation = 45; Grad.Parent = Stroke
 
@@ -105,7 +105,7 @@ CreateToggleMenu(ASSETS.ToggleIcon)
 --========================================================--
 local Window = Library:CreateWindow({
     Title = "MawwwHub",
-    Footer = "MawwwHub • Colorful Edition",
+    Footer = "MawwwHub • Blue Edition",
     Icon = ASSETS.ToggleIcon,
     CornerRadius = 8,
     NotifySide = "Right",
@@ -133,9 +133,9 @@ local HomeLeft  = Tabs.Home:AddLeftGroupbox("Welcome", "sparkles")
 local HomeRight = Tabs.Home:AddRightGroupbox("Info", "info")
 
 HomeLeft:AddImage(ASSETS.HomeBanner, { Text = "", Height = 140 })
-HomeLeft:AddLabel("✨ Selamat datang di MawwwHub ✨"):AddColor(Color3.fromRGB(255, 200, 255))
-HomeLeft:AddLabel("UI Colorful Edition"):AddColor(Color3.fromRGB(200, 200, 255))
-HomeLeft:AddLabel("link discord: https://discord.gg/h2D4xkkJW"):AddColor(Color3.fromRGB(180, 220, 255))
+HomeLeft:AddLabel("✨ Selamat datang di MawwwHub ✨"):AddColor(Color3.fromRGB(180, 220, 255))
+HomeLeft:AddLabel("UI Blue Edition"):AddColor(Color3.fromRGB(150, 200, 255))
+HomeLeft:AddLabel("link discord: https://discord.gg/h2D4xkkJW"):AddColor(Color3.fromRGB(120, 180, 255))
 
 HomeRight:AddLabel("UI Settings"):AddColor(Palette.Cyan)
 HomeRight:AddDivider()
@@ -154,7 +154,7 @@ HomeRight:AddDropdown("HomeNotifySide", {
 })
 HomeRight:AddDropdown("HomeTheme", {
     Text = "Theme Preset",
-    Values = { "Default", "Pink", "Cyan", "Dark" }, Default = "Default", Multi = false,
+    Values = { "Default", "Blue", "Pink", "Cyan", "Dark" }, Default = "Blue", Multi = false,
     Callback = function(v)
         ThemeManager:SetLibrary(Library); ThemeManager:SetTheme(v)
     end,
@@ -196,7 +196,7 @@ ESPMain:AddToggle("ESPHealth",   { Text = "ESP Health",   Default = false, Callb
 ESPMain:AddToggle("ESPDistance", { Text = "ESP Distance", Default = true,  Callback = function(v) _G.Mawww_ESP_Distance = v end })
 ESPMain:AddToggle("ESPTracer",   { Text = "Tracer Line",  Default = false, Callback = function(v) _G.Mawww_ESP_Tracer = v end })
 
-ESPOpts:AddColorpicker("ESPColor", { Text = "ESP Color", Default = Palette.Purple, Callback = function(v) _G.Mawww_ESP_Color = v end })
+ESPOpts:AddColorpicker("ESPColor", { Text = "ESP Color", Default = Palette.Blue, Callback = function(v) _G.Mawww_ESP_Color = v end })
 ESPOpts:AddSlider("ESPRadius", { Text = "ESP Radius", Default = 500, Min = 50, Max = 5000, Rounding = 0, Callback = function(v) _G.Mawww_ESP_Radius = v end })
 ESPOpts:AddSlider("ESPTransparency", { Text = "Transparency", Default = 0.3, Min = 0, Max = 1, Rounding = 2, Callback = function(v) _G.Mawww_ESP_Transparency = v end })
 
@@ -347,6 +347,6 @@ SaveManager:SetFolder("MawwwHub")
 SaveManager:BuildConfigSection(Tabs.Home)
 
 print("====================================")
-print(" MAWWWHUB MAIN • 560 x 380")
+print(" MAWWWHUB • BLUE EDITION • 560 x 380")
 print(" Toggle : LeftControl")
 print("====================================")

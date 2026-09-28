@@ -1,352 +1,309 @@
 --========================================================--
--- MAWWWHUB • COLORFUL EDITION • 560x380
+-- MAWWWHUB KEY GATE
 --========================================================--
 local BASE = "https://raw.githubusercontent.com/mawww1222/MawwwHub/main/"
-
-local Library      = loadstring(game:HttpGet(BASE .. "Library.lua?t=" .. tick()))()
-local ThemeManager = loadstring(game:HttpGet(BASE .. "ThemeManager.lua?t=" .. tick()))()
-local SaveManager  = loadstring(game:HttpGet(BASE .. "SaveManager.lua?t=" .. tick()))()
-
-local Players          = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService       = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace        = game:GetService("Workspace")
-local CoreGui          = game:GetService("CoreGui")
-local TeleportService  = game:GetService("TeleportService")
-
-local Player = Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
+local KeySystem = loadstring(game:HttpGet(BASE .. "KeySystem.lua?t=" .. tick()))()
 
 --========================================================--
--- ASSETS
+-- SAVED KEY
 --========================================================--
-local ASSETS = {
-    ToggleIcon = 88250532753444,
-    HomeBanner = 94736003254558,
-}
-
---========================================================--
--- THEME
---========================================================--
-Library.Scheme.AccentColor     = Color3.fromRGB(70, 130, 220)
-Library.Scheme.BackgroundColor = Color3.fromRGB(8, 14, 28)
-Library.Scheme.MainColor       = Color3.fromRGB(18, 28, 50)
-Library.Scheme.OutlineColor    = Color3.fromRGB(70, 130, 220)
-Library.Scheme.FontColor       = Color3.fromRGB(230, 238, 250)
-
-local Palette = {
-    Purple = Color3.fromRGB(180, 110, 255),
-    Pink   = Color3.fromRGB(255, 105, 180),
-    Cyan   = Color3.fromRGB(80, 210, 255),
-    Green  = Color3.fromRGB(90, 230, 150),
-    Yellow = Color3.fromRGB(255, 215, 90),
-    Orange = Color3.fromRGB(255, 150, 80),
-    Red    = Color3.fromRGB(255, 95, 95),
-    Blue   = Color3.fromRGB(110, 150, 255),
-}
-local ColorKeys = { "Purple", "Pink", "Cyan", "Green", "Yellow", "Orange", "Red", "Blue" }
-local ColorIdx = 0
-local function NextColor()
-    ColorIdx = ColorIdx + 1
-    if ColorIdx > #ColorKeys then ColorIdx = 1 end
-    return Palette[ColorKeys[ColorIdx]]
+local function getSavedKey()
+    if isfile and isfile("MawwwHub/key.txt") then
+        local ok, k = pcall(readfile, "MawwwHub/key.txt")
+        if ok then return k end
+    end
+    return nil
 end
 
---========================================================--
--- TOGGLE MENU BUTTON
---========================================================--
-local function CreateToggleMenu(IconId)
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "MawwwHubToggle"
-    ScreenGui.ResetOnSpawn = false
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    pcall(function() ScreenGui.Parent = CoreGui end)
-
-    local MainButton = Instance.new("TextButton")
-    MainButton.Text = ""
-    MainButton.AutoButtonColor = false
-    MainButton.Size = UDim2.fromOffset(42, 42)
-    MainButton.Position = UDim2.fromOffset(15, 120)
-    MainButton.BackgroundColor3 = Color3.fromRGB(24, 16, 34)
-    MainButton.BackgroundTransparency = 0.05
-    MainButton.Parent = ScreenGui
-
-    local Corner = Instance.new("UICorner") Corner.CornerRadius = UDim.new(0, 10) Corner.Parent = MainButton
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Palette.Purple; Stroke.Thickness = 1.6
-    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; Stroke.Parent = MainButton
-
-    local Grad = Instance.new("UIGradient")
-    Grad.Color = ColorSequence.new({
-      ColorSequenceKeypoint.new(0.00, Color3.fromRGB(60, 120, 255)),   -- biru tua
-      ColorSequenceKeypoint.new(0.25, Color3.fromRGB(80, 170, 255)),   -- biru medium
-      ColorSequenceKeypoint.new(0.50, Color3.fromRGB(120, 210, 255)),  -- biru terang
-      ColorSequenceKeypoint.new(0.75, Color3.fromRGB(80, 170, 255)),   -- biru medium
-      ColorSequenceKeypoint.new(1.00, Color3.fromRGB(60, 120, 255)),   -- biru tua
-   })
-   Grad.Rotation = 45
-   Grad.Parent = Stroke
-
-    local Icon = Instance.new("ImageLabel")
-    Icon.Size = UDim2.fromScale(0.7, 0.7); Icon.Position = UDim2.fromScale(0.15, 0.15)
-    Icon.BackgroundTransparency = 1
-    Icon.Image = "rbxassetid://" .. IconId
-    Icon.Parent = MainButton
-
-    MainButton.MouseButton1Click:Connect(function() Library:Toggle() end)
-    Library:MakeDraggable(MainButton, MainButton)
+local function saveKey(key)
+    if writefile then
+        if isfolder and not isfolder("MawwwHub") then makefolder("MawwwHub") end
+        pcall(writefile, "MawwwHub/key.txt", key)
+    end
 end
 
-CreateToggleMenu(ASSETS.ToggleIcon)
-
---========================================================--
--- WINDOW (560 x 380 px)
---========================================================--
-local Window = Library:CreateWindow({
-    Title = "MawwwHub",
-    Footer = "MawwwHub • Colorful Edition",
-    Icon = ASSETS.ToggleIcon,
-    CornerRadius = 8,
-    NotifySide = "Right",
-    ShowCustomCursor = false,
-    ToggleKeybind = Enum.KeyCode.LeftControl,
-})
-
---========================================================--
--- TABS
---========================================================--
-local Tabs = {
-    Home     = Window:AddTab("Home", "house"),
-    Player   = Window:AddTab("Player", "user"),
-    Visuals  = Window:AddTab("Visuals", "eye"),
-    Combat   = Window:AddTab("Combat", "swords"),
-    Movement = Window:AddTab("Movement", "move"),
-    Scripts  = Window:AddTab("Scripts", "code"),
-    Misc     = Window:AddTab("Misc", "sliders-horizontal"),
-}
-
---========================================================--
--- HOME
---========================================================--
-local HomeLeft  = Tabs.Home:AddLeftGroupbox("Welcome", "sparkles")
-local HomeRight = Tabs.Home:AddRightGroupbox("Info", "info")
-
-HomeLeft:AddImage(ASSETS.HomeBanner, { Text = "", Height = 140 })
-HomeLeft:AddLabel("✨ Selamat datang di MawwwHub ✨"):AddColor(Color3.fromRGB(255, 200, 255))
-HomeLeft:AddLabel("UI Colorful Edition"):AddColor(Color3.fromRGB(200, 200, 255))
-HomeLeft:AddLabel("Link discord: https://discord.gg/h2D4xkkJW"):AddColor(Color3.fromRGB(180, 220, 255))
-
-HomeRight:AddLabel("UI Settings"):AddColor(Palette.Cyan)
-HomeRight:AddDivider()
-HomeRight:AddToggle("HomeUICustomCursor", {
-    Text = "Custom Cursor (PC only)",
-    Default = false,
-    Callback = function(v)
-        Library.ShowCustomCursor = v
-        Library.RefreshCursor()
-    end,
-})
-HomeRight:AddDropdown("HomeNotifySide", {
-    Text = "Notification Side",
-    Values = { "Left", "Right" }, Default = "Right", Multi = false,
-    Callback = function(v) Library:SetNotifySide(v) end,
-})
-HomeRight:AddDropdown("HomeTheme", {
-    Text = "Theme Preset",
-    Values = { "Default", "Pink", "Cyan", "Dark", "Blue" }, Default = "Default", Multi = false,
-    Callback = function(v)
-        ThemeManager:SetLibrary(Library); ThemeManager:SetTheme(v)
-    end,
-})
-HomeRight:AddDivider()
-HomeRight:AddButton("📋 Copy Discord Tag", function()
-    if setclipboard then setclipboard("https://discord.gg/h2D4xkkJW") end
-    Library:Notify({ Title = "Copied", Content = "Discord tag disalin!", Duration = 3 })
-end)
-HomeRight:AddButton("🔄 Rejoin Server", function()
-    TeleportService:Teleport(game.PlaceId)
-end)
-HomeRight:AddButton("❌ Unload MawwwHub", function() Library:Unload() end)
-
---========================================================--
--- PLAYER
---========================================================--
-local PlayerMain  = Tabs.Player:AddLeftGroupbox("Character", "user")
-local PlayerExtra = Tabs.Player:AddRightGroupbox("Extras", "sparkles")
-
-PlayerMain:AddToggle("WalkSpeedToggle", { Text = "Walk Speed", Default = false, Callback = function(v) _G.Mawww_WalkSpeed = v end })
-PlayerMain:AddSlider("WalkSpeedValue", { Text = "Speed Value", Default = 16, Min = 8, Max = 200, Rounding = 0, Callback = function(v) _G.Mawww_WalkSpeedValue = v end })
-PlayerMain:AddToggle("JumpPowerToggle", { Text = "Jump Power", Default = false, Callback = function(v) _G.Mawww_JumpPower = v end })
-PlayerMain:AddSlider("JumpPowerValue", { Text = "Jump Value", Default = 50, Min = 30, Max = 300, Rounding = 0, Callback = function(v) _G.Mawww_JumpPowerValue = v end })
-
-PlayerExtra:AddToggle("InfiniteJump", { Text = "Infinite Jump", Default = false, Callback = function(v) _G.Mawww_InfJump = v end })
-PlayerExtra:AddToggle("AntiAFK", { Text = "Anti AFK", Default = false, Callback = function(v) _G.Mawww_AntiAFK = v end })
-PlayerExtra:AddToggle("GodMode", { Text = "God Mode", Default = false, Callback = function(v) _G.Mawww_GodMode = v end })
-
---========================================================--
--- VISUALS
---========================================================--
-local ESPMain = Tabs.Visuals:AddLeftGroupbox("ESP", "scan-eye")
-local ESPOpts = Tabs.Visuals:AddRightGroupbox("Options", "settings")
-
-ESPMain:AddToggle("ESPPlayer",   { Text = "ESP Player",   Default = false, Callback = function(v) _G.Mawww_ESP_Player = v end })
-ESPMain:AddToggle("ESPName",     { Text = "ESP Name",     Default = true,  Callback = function(v) _G.Mawww_ESP_Name = v end })
-ESPMain:AddToggle("ESPHealth",   { Text = "ESP Health",   Default = false, Callback = function(v) _G.Mawww_ESP_Health = v end })
-ESPMain:AddToggle("ESPDistance", { Text = "ESP Distance", Default = true,  Callback = function(v) _G.Mawww_ESP_Distance = v end })
-ESPMain:AddToggle("ESPTracer",   { Text = "Tracer Line",  Default = false, Callback = function(v) _G.Mawww_ESP_Tracer = v end })
-
-ESPOpts:AddColorpicker("ESPColor", { Text = "ESP Color", Default = Palette.Purple, Callback = function(v) _G.Mawww_ESP_Color = v end })
-ESPOpts:AddSlider("ESPRadius", { Text = "ESP Radius", Default = 500, Min = 50, Max = 5000, Rounding = 0, Callback = function(v) _G.Mawww_ESP_Radius = v end })
-ESPOpts:AddSlider("ESPTransparency", { Text = "Transparency", Default = 0.3, Min = 0, Max = 1, Rounding = 2, Callback = function(v) _G.Mawww_ESP_Transparency = v end })
-
---========================================================--
--- COMBAT
---========================================================--
-local CombatMain = Tabs.Combat:AddLeftGroupbox("Combat", "swords")
-local CombatAim  = Tabs.Combat:AddRightGroupbox("Aim Assist", "crosshair")
-
-CombatMain:AddToggle("AutoParry",  { Text = "Auto Parry",  Default = false, Callback = function(v) _G.Mawww_AutoParry = v end })
-CombatMain:AddSlider("ParryRange", { Text = "Parry Range", Default = 15, Min = 5, Max = 40, Rounding = 0, Callback = function(v) _G.Mawww_ParryRange = v end })
-CombatMain:AddToggle("AutoAttack", { Text = "Auto Attack", Default = false, Callback = function(v) _G.Mawww_AutoAttack = v end })
-CombatMain:AddSlider("AttackDelay",{ Text = "Attack Delay",Default = 0.45, Min = 0.1, Max = 2, Rounding = 2, Callback = function(v) _G.Mawww_AttackDelay = v end })
-CombatMain:AddToggle("KillAura",   { Text = "Kill Aura",   Default = false, Callback = function(v) _G.Mawww_KillAura = v end })
-
-CombatAim:AddToggle("SilentAim",  { Text = "Silent Aim",  Default = false, Callback = function(v) _G.Mawww_SilentAim = v end })
-CombatAim:AddToggle("ShowTracer", { Text = "Show Tracer", Default = false, Callback = function(v) _G.Mawww_ShowTracer = v end })
-CombatAim:AddSlider("SilentAimFOV", { Text = "FOV", Default = 250, Min = 50, Max = 1000, Rounding = 0, Callback = function(v) _G.Mawww_SilentAim_FOV = v end })
-CombatAim:AddDropdown("SilentAimPart", { Text = "Target Part", Values = { "Head", "HumanoidRootPart", "Torso" }, Default = "Head", Multi = false, Callback = function(v) _G.Mawww_SilentAim_Part = v end })
-
---========================================================--
--- MOVEMENT
---========================================================--
-local MoveMain     = Tabs.Movement:AddLeftGroupbox("Movement", "move")
-local MoveTeleport = Tabs.Movement:AddRightGroupbox("Teleport", "navigation")
-
-MoveMain:AddToggle("InfiniteJumpMove", { Text = "Infinite Jump", Default = false, Callback = function(v) _G.Mawww_InfJump = v end })
-MoveMain:AddToggle("Fly",               { Text = "Fly (Basic)",   Default = false, Callback = function(v) _G.Mawww_Fly = v end })
-MoveMain:AddSlider("FlySpeed", { Text = "Fly Speed", Default = 50, Min = 10, Max = 500, Rounding = 0, Callback = function(v) _G.Mawww_FlySpeed = v end })
-MoveMain:AddToggle("Noclip",     { Text = "Noclip",      Default = false, Callback = function(v) _G.Mawww_Noclip = v end })
-MoveMain:AddToggle("SpeedBoost", { Text = "Speed Boost", Default = false, Callback = function(v) _G.Mawww_SpeedBoost = v end })
-
-MoveTeleport:AddButton("📌 Save Position", function()
-    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        _G.Mawww_SavedPos = hrp.CFrame
-        Library:Notify({ Title = "Saved", Content = "Posisi disimpan!", Duration = 3 })
+local function clearSavedKey()
+    if delfile and isfile and isfile("MawwwHub/key.txt") then
+        pcall(delfile, "MawwwHub/key.txt")
     end
-end)
-MoveTeleport:AddButton("🎯 Teleport to Saved", function()
-    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp and _G.Mawww_SavedPos then
-        hrp.CFrame = _G.Mawww_SavedPos
-        Library:Notify({ Title = "Teleported", Content = "Ke posisi tersimpan!", Duration = 3 })
-    end
-end)
-MoveTeleport:AddButton("🚀 Teleport to Mouse", function()
-    local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-    local mouse = Player:GetMouse()
-    if hrp and mouse.Hit then
-        hrp.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0, 3, 0))
-    end
-end)
+end
 
---========================================================--
--- SCRIPTS
---========================================================--
-local ScriptsBox   = Tabs.Scripts:AddLeftGroupbox("Script Loader", "code")
-local ScriptsQuick = Tabs.Scripts:AddRightGroupbox("Quick Load", "zap")
+local function loadMainScript()
+    loadstring(game:HttpGet(BASE .. "MawwwHub_Main.lua?t=" .. tick()))()
+end
 
-ScriptsBox:AddInput("ScriptURL", {
-    Text = "Script URL", Default = "",
-    Placeholder = "https://... (raw lua)",
-    Callback = function(v) _G.Mawww_ScriptURL = v end,
-})
-ScriptsBox:AddButton("▶️ Execute Script", function()
-    if _G.Mawww_ScriptURL and _G.Mawww_ScriptURL ~= "" then
-        local ok, err = pcall(function() loadstring(game:HttpGet(_G.Mawww_ScriptURL))() end)
-        if ok then
-            Library:Notify({ Title = "Success", Content = "Script dijalankan!", Duration = 3 })
-        else
-            Library:Notify({ Title = "Error", Content = tostring(err), Duration = 4 })
-        end
+-- Auto-load kalau ada key tersimpan
+local savedKey = getSavedKey()
+if savedKey then
+    local valid = KeySystem:ValidateKey(savedKey)
+    if valid then
+        loadMainScript()
+        return
     else
-        Library:Notify({ Title = "Warning", Content = "URL masih kosong!", Duration = 3 })
+        clearSavedKey()
     end
-end)
-ScriptsBox:AddDivider()
-ScriptsBox:AddButton("🧹 Clear Console", function() if rconsoleclear then rconsoleclear() end end)
-
-ScriptsQuick:AddButton("⚡ Infinite Yield", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-end)
-ScriptsQuick:AddButton("🌊 Hydroxide", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Upbolt/Hydroxide/master/init.lua"))()()
-end)
-ScriptsQuick:AddButton("🔧 IY Admin Commands", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-end)
+end
 
 --========================================================--
--- MISC
+-- KEY UI
 --========================================================--
-local MiscCamera = Tabs.Misc:AddLeftGroupbox("Camera", "camera")
-local MiscFun    = Tabs.Misc:AddRightGroupbox("Fun", "smile")
+local function ShowKeyUI()
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "MawwwKeyUI"
+    gui.ResetOnSpawn = false
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    pcall(function() gui.Parent = game:GetService("CoreGui") end)
 
-MiscCamera:AddToggle("UnlimitedZoom", { Text = "Unlimited Zoom", Default = false, Callback = function(v) _G.Mawww_UnlimZoom = v end })
-MiscCamera:AddSlider("MaxZoom", { Text = "Max Zoom Distance", Default = 1000, Min = 100, Max = 10000, Rounding = 0, Callback = function(v) _G.Mawww_MaxZoom = v end })
-MiscCamera:AddToggle("CustomFOV", { Text = "Custom FOV", Default = false, Callback = function(v) _G.Mawww_CustomFOV = v end })
-MiscCamera:AddSlider("FOVValue", { Text = "FOV Value", Default = 70, Min = 40, Max = 120, Rounding = 0, Callback = function(v) _G.Mawww_FOV = v end })
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.fromOffset(420, 320)
+    frame.Position = UDim2.new(0.5, -210, 0.5, -160)
+    frame.BackgroundColor3 = Color3.fromRGB(12, 8, 18)
+    frame.BorderSizePixel = 0
+    frame.Parent = gui
 
-MiscFun:AddButton("🎵 Play Emote (Wave)", function()
-    local r = ReplicatedStorage:FindFirstChild("Remotes")
-    if r and r:FindFirstChild("EmoteHandler") then
-        pcall(function() r.EmoteHandler:FireServer("Wave") end)
-    end
-end)
-MiscFun:AddButton("💃 Play Emote (Dance)", function()
-    local r = ReplicatedStorage:FindFirstChild("Remotes")
-    if r and r:FindFirstChild("EmoteHandler") then
-        pcall(function() r.EmoteHandler:FireServer("Mannrobics") end)
-    end
-end)
-MiscFun:AddToggle("JerkTool", { Text = "Jerk Tool", Default = false, Callback = function(v) _G.Mawww_JerkTool = v end })
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = frame
 
---========================================================--
--- COLORFUL STROKE
---========================================================--
-local function PaintButtons(container)
-    if not container then return end
-    task.spawn(function()
-        for _, d in ipairs(container:GetDescendants()) do
-            if d:IsA("GuiButton") and not d:FindFirstChildOfClass("UIStroke") then
-                local s = Instance.new("UIStroke")
-                s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                s.Thickness = 1.3
-                s.Color = NextColor()
-                s.Parent = d
-                local g = Instance.new("UIGradient")
-                g.Color = ColorSequence.new(NextColor(), NextColor())
-                g.Rotation = 45
-                g.Parent = s
-            end
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(180, 110, 255)
+    stroke.Thickness = 2
+    stroke.Parent = frame
+
+    local grad = Instance.new("UIGradient")
+    grad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(180, 110, 255)),
+        ColorSequenceKeypoint.new(0.50, Color3.fromRGB(80, 210, 255)),
+        ColorSequenceKeypoint.new(1.00, Color3.fromRGB(180, 110, 255)),
+    })
+    grad.Rotation = 45
+    grad.Parent = stroke
+
+    -- Title
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, -20, 0, 40)
+    title.Position = UDim2.fromOffset(10, 12)
+    title.BackgroundTransparency = 1
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 22
+    title.TextColor3 = Color3.fromRGB(180, 110, 255)
+    title.Text = "🔐 MAWWWHUB"
+    title.Parent = frame
+
+    local sub = Instance.new("TextLabel")
+    sub.Size = UDim2.new(1, -20, 0, 20)
+    sub.Position = UDim2.fromOffset(10, 52)
+    sub.BackgroundTransparency = 1
+    sub.Font = Enum.Font.Gotham
+    sub.TextSize = 12
+    sub.TextColor3 = Color3.fromRGB(200, 200, 210)
+    sub.Text = "Masukkan key untuk mengakses script"
+    sub.Parent = frame
+
+    -- Input
+    local input = Instance.new("TextBox")
+    input.Size = UDim2.new(1, -20, 0, 42)
+    input.Position = UDim2.fromOffset(10, 84)
+    input.BackgroundColor3 = Color3.fromRGB(28, 22, 38)
+    input.BorderSizePixel = 0
+    input.Font = Enum.Font.Gotham
+    input.TextSize = 13
+    input.TextColor3 = Color3.fromRGB(240, 240, 245)
+    input.PlaceholderText = "MAWWW-XXXX-XXXX-XXXX"
+    input.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
+    input.Text = ""
+    input.ClearTextOnFocus = false
+    input.Parent = frame
+
+    local inCorner = Instance.new("UICorner")
+    inCorner.CornerRadius = UDim.new(0, 6)
+    inCorner.Parent = input
+
+    local inStroke = Instance.new("UIStroke")
+    inStroke.Color = Color3.fromRGB(180, 110, 255)
+    inStroke.Thickness = 1
+    inStroke.Parent = input
+
+    -- Status
+    local status = Instance.new("TextLabel")
+    status.Size = UDim2.new(1, -20, 0, 20)
+    status.Position = UDim2.fromOffset(10, 132)
+    status.BackgroundTransparency = 1
+    status.Font = Enum.Font.Gotham
+    status.TextSize = 11
+    status.TextColor3 = Color3.fromRGB(255, 100, 100)
+    status.Text = ""
+    status.Parent = frame
+
+    -- Verify
+    local verifyBtn = Instance.new("TextButton")
+    verifyBtn.Size = UDim2.new(1, -20, 0, 40)
+    verifyBtn.Position = UDim2.fromOffset(10, 158)
+    verifyBtn.BackgroundColor3 = Color3.fromRGB(180, 110, 255)
+    verifyBtn.BorderSizePixel = 0
+    verifyBtn.Font = Enum.Font.GothamBold
+    verifyBtn.TextSize = 14
+    verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    verifyBtn.Text = "VERIFY KEY"
+    verifyBtn.AutoButtonColor = false
+    verifyBtn.Parent = frame
+
+    local vCorner = Instance.new("UICorner")
+    vCorner.CornerRadius = UDim.new(0, 6)
+    vCorner.Parent = verifyBtn
+
+    -- Buy button
+    local buyBtn = Instance.new("TextButton")
+    buyBtn.Size = UDim2.new(0.5, -15, 0, 34)
+    buyBtn.Position = UDim2.fromOffset(10, 206)
+    buyBtn.BackgroundColor3 = Color3.fromRGB(40, 30, 55)
+    buyBtn.BorderSizePixel = 0
+    buyBtn.Font = Enum.Font.GothamBold
+    buyBtn.TextSize = 11
+    buyBtn.TextColor3 = Color3.fromRGB(180, 110, 255)
+    buyBtn.Text = "🔗 BELI KEY"
+    buyBtn.AutoButtonColor = false
+    buyBtn.Parent = frame
+
+    local bCorner = Instance.new("UICorner")
+    bCorner.CornerRadius = UDim.new(0, 6)
+    bCorner.Parent = buyBtn
+
+    local bStroke = Instance.new("UIStroke")
+    bStroke.Color = Color3.fromRGB(180, 110, 255)
+    bStroke.Thickness = 1
+    bStroke.Parent = buyBtn
+
+    -- Clear button
+    local clearBtn = Instance.new("TextButton")
+    clearBtn.Size = UDim2.new(0.5, -15, 0, 34)
+    clearBtn.Position = UDim2.new(0.5, 5, 0, 206)
+    clearBtn.BackgroundColor3 = Color3.fromRGB(40, 30, 55)
+    clearBtn.BorderSizePixel = 0
+    clearBtn.Font = Enum.Font.GothamBold
+    clearBtn.TextSize = 11
+    clearBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+    clearBtn.Text = "🗑️ CLEAR SAVED"
+    clearBtn.AutoButtonColor = false
+    clearBtn.Parent = frame
+
+    local cCorner = Instance.new("UICorner")
+    cCorner.CornerRadius = UDim.new(0, 6)
+    cCorner.Parent = clearBtn
+
+    local cStroke = Instance.new("UIStroke")
+    cStroke.Color = Color3.fromRGB(255, 100, 100)
+    cStroke.Thickness = 1
+    cStroke.Parent = clearBtn
+
+    -- HWID info
+    local hwidLbl = Instance.new("TextLabel")
+    hwidLbl.Size = UDim2.new(1, -20, 0, 18)
+    hwidLbl.Position = UDim2.fromOffset(10, 250)
+    hwidLbl.BackgroundTransparency = 1
+    hwidLbl.Font = Enum.Font.Gotham
+    hwidLbl.TextSize = 9
+    hwidLbl.TextColor3 = Color3.fromRGB(120, 120, 130)
+    hwidLbl.Text = "HWID: " .. KeySystem:GetHWID():sub(1, 30) .. "..."
+    hwidLbl.Parent = frame
+
+    -- Footer info
+    local footer = Instance.new("TextLabel")
+    footer.Size = UDim2.new(1, -20, 0, 18)
+    footer.Position = UDim2.fromOffset(10, 270)
+    footer.BackgroundTransparency = 1
+    footer.Font = Enum.Font.Gotham
+    footer.TextSize = 10
+    footer.TextColor3 = Color3.fromRGB(150, 150, 160)
+    footer.Text = "Dapatkan key dengan klik BELI KEY"
+    footer.Parent = frame
+
+    --======================================================--
+    -- HANDLERS
+    --======================================================--
+    local isVerifying = false
+
+    verifyBtn.MouseButton1Click:Connect(function()
+        if isVerifying then return end
+        isVerifying = true
+
+        local key = input.Text
+        status.Text = "⏳ Checking..."
+        status.TextColor3 = Color3.fromRGB(200, 200, 100)
+        verifyBtn.Text = "CHECKING..."
+
+        task.wait(0.2)
+        local valid, msg = KeySystem:ValidateKey(key)
+
+        if valid then
+            status.Text = msg
+            status.TextColor3 = Color3.fromRGB(100, 255, 150)
+            verifyBtn.Text = "✅ SUCCESS"
+            saveKey(key)
+            task.wait(0.8)
+            gui:Destroy()
+            loadMainScript()
+        else
+            status.Text = msg
+            status.TextColor3 = Color3.fromRGB(255, 100, 100)
+            verifyBtn.Text = "VERIFY KEY"
+            isVerifying = false
+        end
+    end)
+
+    buyBtn.MouseButton1Click:Connect(function()
+        local link = KeySystem:GetBuyLink()
+        if setclipboard then
+            setclipboard(link)
+            status.Text = "🔗 Link beli dicopy!"
+            status.TextColor3 = Color3.fromRGB(100, 200, 255)
+        else
+            status.Text = link
+            status.TextColor3 = Color3.fromRGB(100, 200, 255)
+        end
+    end)
+
+    clearBtn.MouseButton1Click:Connect(function()
+        clearSavedKey()
+        status.Text = "🗑️ Saved key dihapus!"
+        status.TextColor3 = Color3.fromRGB(255, 200, 100)
+    end)
+
+    input.FocusLost:Connect(function(enter)
+        if enter then verifyBtn.MouseButton1Click:Fire() end
+    end)
+
+    -- Draggable
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input2)
+        if input2.UserInputType == Enum.UserInputType.MouseButton1
+        or input2.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input2.Position
+            startPos = frame.Position
+        end
+    end)
+    frame.InputChanged:Connect(function(input2)
+        if input2.UserInputType == Enum.UserInputType.MouseMovement
+        or input2.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input2
+        end
+    end)
+    game:GetService("UserInputService").InputChanged:Connect(function(input2)
+        if input2 == dragInput and dragging then
+            local d = input2.Position - dragStart
+            frame.Position = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + d.X,
+                startPos.Y.Scale, startPos.Y.Offset + d.Y
+            )
+        end
+    end)
+    game:GetService("UserInputService").InputEnded:Connect(function(input2)
+        if input2.UserInputType == Enum.UserInputType.MouseButton1
+        or input2.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
         end
     end)
 end
 
-PaintButtons(Window.Gui)
-
---========================================================--
--- MANAGERS
---========================================================--
-ThemeManager:SetLibrary(Library)
-ThemeManager:SetFolder("MawwwHub")
-
-SaveManager:SetLibrary(Library)
-SaveManager:SetFolder("MawwwHub")
-SaveManager:BuildConfigSection(Tabs.Home)
-
-print("====================================")
-print(" MAWWWHUB • 560 x 380")
-print(" Toggle : LeftControl")
-print("====================================")
+ShowKeyUI()

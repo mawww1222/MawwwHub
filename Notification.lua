@@ -1,6 +1,6 @@
 --========================================================--
--- MAWWWHUB NOTIFICATION — SIMPLE VERSION (Perfect Center)
--- Foto + Loading Text + Red Bar + Status Text
+-- MAWWWHUB NOTIFICATION — SIMPLE (Perfect Center v2)
+-- Pakai ViewportSize untuk center sempurna
 --========================================================--
 local Notification = {}
 
@@ -11,6 +11,7 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
+local Workspace = game:GetService("Workspace")
 
 local Player = Players.LocalPlayer
 
@@ -41,6 +42,16 @@ local function new(class, props)
     return inst
 end
 
+-- 🎯 HITUNG CENTER PAKAI VIEWPORT
+local function getScreenCenter()
+    local camera = Workspace.CurrentCamera
+    if camera then
+        local vp = camera.ViewportSize
+        return vp.X / 2, vp.Y / 2
+    end
+    return 640, 360  -- fallback
+end
+
 local function initGui()
     if notifyGui and notifyGui.Parent then return end
 
@@ -51,7 +62,7 @@ local function initGui()
         Name = "MawwwNotify",
         ResetOnSpawn = false,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-        IgnoreGuiInset = false,     -- 🎯 false biar center beneran
+        IgnoreGuiInset = true,   -- 🎯 true supaya full screen
         DisplayOrder = 999,
         Parent = CoreGui,
     })
@@ -73,17 +84,19 @@ local function createCard(opts)
     local showBar = opts.ShowBar ~= false
 
     --======================================================--
-    -- 🎯 CARD — LANGSUNG DI SCREENGUI, TENGAH SEMPURNA
+    -- 🎯 CARD — PAKAI ABSOLUTE OFFSET (CENTER SEMPURNA)
     --======================================================--
+    local cx, cy = getScreenCenter()
+
     local card = new("Frame", {
         Name = "Card",
         Size = UDim2.fromOffset(0, 0),
-        Position = UDim2.new(0.5, 0, 0.5, 0),      -- 🎯 tengah layar
-        AnchorPoint = Vector2.new(0.5, 0.5),       -- 🎯 anchor ke tengah
+        Position = UDim2.fromOffset(cx, cy),          -- 🎯 absolute center
+        AnchorPoint = Vector2.new(0.5, 0.5),          -- 🎯 anchor ke tengah
         BackgroundColor3 = Color3.fromRGB(12, 10, 18),
         BackgroundTransparency = 0.1,
         BorderSizePixel = 0,
-        Parent = notifyGui,                        -- 🎯 langsung ke ScreenGui
+        Parent = notifyGui,
     })
 
     new("UICorner", {
@@ -161,6 +174,20 @@ local function createCard(opts)
     new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = redBar })
 
     --======================================================--
+    -- 🎯 RESIZE LISTENER (kalau layar berubah/rotate)
+    --======================================================--
+    local resizeConn
+    local camera = Workspace.CurrentCamera
+    if camera then
+        resizeConn = camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+            if card and card.Parent then
+                local newCx, newCy = getScreenCenter()
+                card.Position = UDim2.fromOffset(newCx, newCy)
+            end
+        end)
+    end
+
+    --======================================================--
     -- POP-IN ANIMATION
     --======================================================--
     task.delay(0.05, function()
@@ -196,6 +223,7 @@ local function createCard(opts)
         task.delay(duration, function()
             if not card.Parent then return end
             if barLoop then barLoop:Disconnect() end
+            if resizeConn then resizeConn:Disconnect() end
 
             TweenService:Create(card, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
                 Size = UDim2.fromOffset(0, 0),

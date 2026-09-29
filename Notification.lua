@@ -1,5 +1,5 @@
 --========================================================--
--- MAWWWHUB NOTIFICATION — SIMPLE VERSION
+-- MAWWWHUB NOTIFICATION — SIMPLE VERSION (Perfect Center)
 -- Foto + Loading Text + Red Bar + Status Text
 --========================================================--
 local Notification = {}
@@ -15,7 +15,7 @@ local CoreGui = game:GetService("CoreGui")
 local Player = Players.LocalPlayer
 
 --========================================================--
--- 🎨 ASSET ID FOTO (GANTI DI SINI KALAU MAU)
+-- 🎨 ASSET ID FOTO
 --========================================================--
 local ASSET_LOGO = "88250532753444"
 
@@ -23,7 +23,6 @@ local ASSET_LOGO = "88250532753444"
 -- STATE
 --========================================================--
 local notifyGui = nil
-local notifyContainer = nil
 local currentCard = nil
 
 --========================================================--
@@ -52,19 +51,9 @@ local function initGui()
         Name = "MawwwNotify",
         ResetOnSpawn = false,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-        IgnoreGuiInset = true,
+        IgnoreGuiInset = false,     -- 🎯 false biar center beneran
         DisplayOrder = 999,
         Parent = CoreGui,
-    })
-
-    notifyContainer = new("Frame", {
-        Name = "Container",
-        Size = UDim2.new(0, 220, 0, 0),
-        Position = UDim2.new(0.5, 0, 0.5, 0),
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        BackgroundTransparency = 1,
-        AutomaticSize = Enum.AutomaticSize.Y,
-        Parent = notifyGui,
     })
 end
 
@@ -84,17 +73,17 @@ local function createCard(opts)
     local showBar = opts.ShowBar ~= false
 
     --======================================================--
-    -- CARD FRAME
+    -- 🎯 CARD — LANGSUNG DI SCREENGUI, TENGAH SEMPURNA
     --======================================================--
     local card = new("Frame", {
         Name = "Card",
-        Size = UDim2.new(0, 0, 0, 0),
-        Position = UDim2.new(0, 0, 0, 0),
-        AnchorPoint = Vector2.new(0.5, 0.5),
+        Size = UDim2.fromOffset(0, 0),
+        Position = UDim2.new(0.5, 0, 0.5, 0),      -- 🎯 tengah layar
+        AnchorPoint = Vector2.new(0.5, 0.5),       -- 🎯 anchor ke tengah
         BackgroundColor3 = Color3.fromRGB(12, 10, 18),
         BackgroundTransparency = 0.1,
         BorderSizePixel = 0,
-        Parent = notifyContainer,
+        Parent = notifyGui,                        -- 🎯 langsung ke ScreenGui
     })
 
     new("UICorner", {
@@ -110,7 +99,7 @@ local function createCard(opts)
     })
 
     --======================================================--
-    -- FOTO LOGO
+    -- FOTO
     --======================================================--
     local logoFrame = new("Frame", {
         Name = "LogoFrame",
@@ -134,7 +123,7 @@ local function createCard(opts)
     --======================================================--
     -- TEXT STATUS
     --======================================================--
-    local statusText = new("TextLabel", {
+    new("TextLabel", {
         Name = "StatusText",
         Size = UDim2.new(1, -20, 0, 20),
         Position = UDim2.fromOffset(10, 138),
@@ -148,7 +137,7 @@ local function createCard(opts)
     })
 
     --======================================================--
-    -- RED BAR (Loading Bar)
+    -- RED BAR
     --======================================================--
     local barBackground = new("Frame", {
         Name = "BarBackground",
@@ -181,7 +170,7 @@ local function createCard(opts)
     end)
 
     --======================================================--
-    -- RED BAR ANIMATION (bergerak ke kanan, loop)
+    -- RED BAR ANIMATION
     --======================================================--
     local barLoop
     if showBar then
@@ -192,9 +181,7 @@ local function createCard(opts)
             end
             local posX = redBar.Position.X.Scale
             posX = posX + 0.015
-            if posX > 1 then
-                posX = -0.2
-            end
+            if posX > 1 then posX = -0.2 end
             redBar.Position = UDim2.new(posX, 0, 0, 0)
         end)
     else
@@ -228,8 +215,6 @@ end
 --========================================================--
 -- PUBLIC API
 --========================================================--
-
--- 🔴 Loading (dengan red bar bergerak)
 function Notification.Loading(text, duration)
     return createCard({
         Text = text or "LOADING...",
@@ -240,7 +225,6 @@ function Notification.Loading(text, duration)
     })
 end
 
--- ✅ Key Activated (hijau)
 function Notification.KeyActivated()
     return createCard({
         Text = "KEY ACTIVATED",
@@ -251,7 +235,6 @@ function Notification.KeyActivated()
     })
 end
 
--- ❌ Key Not Active (merah)
 function Notification.KeyNotActive()
     return createCard({
         Text = "KEY NO ACTIVE",
@@ -262,28 +245,22 @@ function Notification.KeyNotActive()
     })
 end
 
--- Update text pada card yang sedang aktif
 function Notification.SetText(text)
     if currentCard and currentCard.Parent then
         local statusText = currentCard:FindFirstChild("StatusText")
-        if statusText then
-            statusText.Text = text
-        end
+        if statusText then statusText.Text = text end
     end
 end
 
--- Ganti warna teks
 function Notification.SetColor(color)
     if currentCard and currentCard.Parent then
         local statusText = currentCard:FindFirstChild("StatusText")
-        if statusText then
-            statusText.TextColor3 = color
-        end
+        if statusText then statusText.TextColor3 = color end
     end
 end
 
 --========================================================--
--- COMPATIBILITY (biar gak error pas dipanggil dari MawwwHub.lua)
+-- COMPATIBILITY
 --========================================================--
 function Notification.WelcomeImage(opts)
     opts = opts or {}
@@ -331,14 +308,14 @@ end
 function Notification.UpdateLoading(card, opts)
     if not card or not card.Parent then return end
     local statusText = card:FindFirstChild("StatusText")
-    if statusText and opts then
-        if opts.Title then statusText.Text = opts.Title end
+    if statusText and opts and opts.Title then
+        statusText.Text = opts.Title
     end
 end
 
 function Notification.ClearAll()
-    if notifyContainer then
-        for _, child in ipairs(notifyContainer:GetChildren()) do
+    if notifyGui then
+        for _, child in ipairs(notifyGui:GetChildren()) do
             if child:IsA("Frame") then
                 child:Destroy()
             end

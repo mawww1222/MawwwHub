@@ -18,16 +18,11 @@ local TeleportService  = game:GetService("TeleportService")
 local Player = Players.LocalPlayer
 
 --========================================================--
--- 🎨 ASSETS — REKOMENDASI FOTO
+-- 🎨 ASSETS
 --========================================================--
 local ASSETS = {
-    -- Icon toggle floating + window header
     ToggleIcon   = 88250532753444,
-
-    -- 🎯 FOTO HOME TAB (rekomendasi: pakai icon MawwwHub kamu sendiri)
     HomePhoto    = 88250532753444,
-
-    -- Banner Home (opsional, di bawah foto)
     HomeBanner   = 94736003254558,
 }
 
@@ -143,7 +138,6 @@ local Tabs = {
 local HomeLeft  = Tabs.Home:AddLeftGroupbox("Welcome", "sparkles")
 local HomeRight = Tabs.Home:AddRightGroupbox("Info", "info")
 
--- 🎯 FOTO MAWWWHUB
 HomeLeft:AddImage(ASSETS.HomePhoto, {
     Text = "",
     Height = 150,
@@ -364,6 +358,6 @@ SaveManager:SetFolder("MawwwHub")
 SaveManager:BuildConfigSection(Tabs.Home)
 
 print("====================================")
-print(" MAWWWHUB • HOME WITH PHOTO")
+print(" MAWWWHUB • SIMPLE NOTIFICATION")
 print(" Toggle : LeftControl")
 print("====================================")

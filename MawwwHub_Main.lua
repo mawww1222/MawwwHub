@@ -1,6 +1,5 @@
 --========================================================--
--- MAWWWHUB MAIN SCRIPT • BLUE EDITION • 560x380
--- File: MawwwHub_Main.lua
+-- MAWWWHUB MAIN SCRIPT • HOME WITH PHOTO
 --========================================================--
 local BASE = "https://raw.githubusercontent.com/mawww1222/MawwwHub/main/"
 
@@ -17,18 +16,18 @@ local CoreGui          = game:GetService("CoreGui")
 local TeleportService  = game:GetService("TeleportService")
 
 local Player = Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
 
 --========================================================--
--- ASSETS
+-- 🎨 ASSETS — GANTI ASSET ID DI SINI
 --========================================================--
 local ASSETS = {
-    ToggleIcon = 88250532753444,
-    HomeBanner = 94736003254558,
+    ToggleIcon   = 88250532753444,        -- Icon toggle floating
+    HomeBanner   = 94736003254558,        -- Banner Home (opsional)
+    MawwwHubLogo = 88250532753444,        -- 🎯 Foto MawwwHub di Home tab (GANTI sesuai kebutuhan)
 }
 
 --========================================================--
--- THEME (BLUE)
+-- THEME
 --========================================================--
 Library.Scheme.AccentColor     = Color3.fromRGB(80, 170, 255)
 Library.Scheme.BackgroundColor = Color3.fromRGB(8, 14, 26)
@@ -73,10 +72,15 @@ local function CreateToggleMenu(IconId)
     MainButton.BackgroundTransparency = 0.05
     MainButton.Parent = ScreenGui
 
-    local Corner = Instance.new("UICorner") Corner.CornerRadius = UDim.new(0, 10) Corner.Parent = MainButton
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 10)
+    Corner.Parent = MainButton
+
     local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Palette.Blue; Stroke.Thickness = 1.6
-    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; Stroke.Parent = MainButton
+    Stroke.Color = Palette.Blue
+    Stroke.Thickness = 1.6
+    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    Stroke.Parent = MainButton
 
     local Grad = Instance.new("UIGradient")
     Grad.Color = ColorSequence.new({
@@ -86,10 +90,12 @@ local function CreateToggleMenu(IconId)
         ColorSequenceKeypoint.new(0.75, Palette.Blue),
         ColorSequenceKeypoint.new(1.00, Palette.Cyan),
     })
-    Grad.Rotation = 45; Grad.Parent = Stroke
+    Grad.Rotation = 45
+    Grad.Parent = Stroke
 
     local Icon = Instance.new("ImageLabel")
-    Icon.Size = UDim2.fromScale(0.7, 0.7); Icon.Position = UDim2.fromScale(0.15, 0.15)
+    Icon.Size = UDim2.fromScale(0.7, 0.7)
+    Icon.Position = UDim2.fromScale(0.15, 0.15)
     Icon.BackgroundTransparency = 1
     Icon.Image = "rbxassetid://" .. IconId
     Icon.Parent = MainButton
@@ -101,7 +107,7 @@ end
 CreateToggleMenu(ASSETS.ToggleIcon)
 
 --========================================================--
--- WINDOW (560 x 380 px)
+-- WINDOW
 --========================================================--
 local Window = Library:CreateWindow({
     Title = "MawwwHub",
@@ -127,15 +133,20 @@ local Tabs = {
 }
 
 --========================================================--
--- HOME
+-- 🏠 HOME TAB (dengan FOTO MawwwHub)
 --========================================================--
 local HomeLeft  = Tabs.Home:AddLeftGroupbox("Welcome", "sparkles")
 local HomeRight = Tabs.Home:AddRightGroupbox("Info", "info")
 
-HomeLeft:AddImage(ASSETS.HomeBanner, { Text = "", Height = 140 })
+-- 🎯 FOTO MAWWWHUB di Home tab
+HomeLeft:AddImage(ASSETS.MawwwHubLogo, {
+    Text = "",
+    Height = 150,
+})
+
 HomeLeft:AddLabel("✨ Selamat datang di MawwwHub ✨"):AddColor(Color3.fromRGB(180, 220, 255))
 HomeLeft:AddLabel("UI Blue Edition"):AddColor(Color3.fromRGB(150, 200, 255))
-HomeLeft:AddLabel("link discord: https://discord.gg/h2D4xkkJW"):AddColor(Color3.fromRGB(120, 180, 255))
+HomeLeft:AddLabel("Discord: MawwwHub#0001"):AddColor(Color3.fromRGB(120, 180, 255))
 
 HomeRight:AddLabel("UI Settings"):AddColor(Palette.Cyan)
 HomeRight:AddDivider()
@@ -156,12 +167,13 @@ HomeRight:AddDropdown("HomeTheme", {
     Text = "Theme Preset",
     Values = { "Default", "Blue", "Pink", "Cyan", "Dark" }, Default = "Blue", Multi = false,
     Callback = function(v)
-        ThemeManager:SetLibrary(Library); ThemeManager:SetTheme(v)
+        ThemeManager:SetLibrary(Library)
+        ThemeManager:SetTheme(v)
     end,
 })
 HomeRight:AddDivider()
 HomeRight:AddButton("📋 Copy Discord Tag", function()
-    if setclipboard then setclipboard("https://discord.gg/h2D4xkkJW") end
+    if setclipboard then setclipboard("MawwwHub#0001") end
     Library:Notify({ Title = "Copied", Content = "Discord tag disalin!", Duration = 3 })
 end)
 HomeRight:AddButton("🔄 Rejoin Server", function()
@@ -347,6 +359,6 @@ SaveManager:SetFolder("MawwwHub")
 SaveManager:BuildConfigSection(Tabs.Home)
 
 print("====================================")
-print(" MAWWWHUB • BLUE EDITION • 560 x 380")
+print(" MAWWWHUB • HOME WITH PHOTO")
 print(" Toggle : LeftControl")
 print("====================================")

@@ -1,28 +1,13 @@
 --========================================================--
--- MAWWWHUB KEY GATE — BUG FIXED VERSION
+-- MAWWWHUB KEY GATE — FIXED (No Pop-in Bug)
+-- Key UI muncul duluan, notif simple
 --========================================================--
 local BASE = "https://raw.githubusercontent.com/mawww1222/MawwwHub/main/"
 
--- 🐛 FIX #4: Wrap load dengan pcall
+-- Load dengan pcall
 local KeySystem, Notification
-
-local ok1, result1 = pcall(function()
-    return loadstring(game:HttpGet(BASE .. "KeySystem.lua?t=" .. tick()))()
-end)
-if ok1 and result1 then
-    KeySystem = result1
-else
-    warn("[MawwwHub] Gagal load KeySystem.lua: " .. tostring(result1))
-end
-
-local ok2, result2 = pcall(function()
-    return loadstring(game:HttpGet(BASE .. "Notification.lua?t=" .. tick()))()
-end)
-if ok2 and result2 then
-    Notification = result2
-else
-    warn("[MawwwHub] Gagal load Notification.lua: " .. tostring(result2))
-end
+pcall(function() KeySystem = loadstring(game:HttpGet(BASE .. "KeySystem.lua?t=" .. tick()))() end)
+pcall(function() Notification = loadstring(game:HttpGet(BASE .. "Notification.lua?t=" .. tick()))() end)
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -34,26 +19,24 @@ local Player = Players.LocalPlayer
 local KEY_LOGO_ID = "88250532753444"
 
 --========================================================--
--- SAVED KEY (dengan guard)
+-- SAVED KEY
 --========================================================--
 local function getSavedKey()
-    local ok, result = pcall(function()
+    local ok, k = pcall(function()
         if isfile and isfile("MawwwHub/key.txt") then
-            local k = readfile("MawwwHub/key.txt")
-            if k and k ~= "" then return k end
+            local r = readfile("MawwwHub/key.txt")
+            if r and r ~= "" then return r end
         end
         return nil
     end)
-    if ok then return result end
+    if ok then return k end
     return nil
 end
 
 local function saveKey(key)
     pcall(function()
         if writefile then
-            if isfolder and not isfolder("MawwwHub") then
-                makefolder("MawwwHub")
-            end
+            if isfolder and not isfolder("MawwwHub") then makefolder("MawwwHub") end
             writefile("MawwwHub/key.txt", key)
         end
     end)
@@ -68,47 +51,30 @@ local function clearSavedKey()
 end
 
 local function loadMainScript()
-    local ok, err = pcall(function()
+    pcall(function()
         loadstring(game:HttpGet(BASE .. "MawwwHub_Main.lua?t=" .. tick()))()
     end)
-    if not ok then
-        warn("[MawwwHub] Gagal load main script: " .. tostring(err))
+end
+
+--========================================================--
+-- SAFE NOTIF
+--========================================================--
+local function showNotif(text, color)
+    if Notification and Notification.Loading then
+        pcall(function()
+            if Notification.ClearAll then Notification.ClearAll() end
+            Notification.Loading(text, 4)
+        end)
     end
 end
 
 --========================================================--
--- SAFE NOTIFICATION WRAPPER
---========================================================--
-local SafeNotif = {
-    Loading = function(text, dur)
-        if Notification and Notification.Loading then
-            pcall(function() Notification.Loading(text, dur) end)
-        end
-    end,
-    KeyActivated = function()
-        if Notification and Notification.KeyActivated then
-            pcall(function() Notification.KeyActivated() end)
-        end
-    end,
-    KeyNotActive = function()
-        if Notification and Notification.KeyNotActive then
-            pcall(function() Notification.KeyNotActive() end)
-        end
-    end,
-    ClearAll = function()
-        if Notification and Notification.ClearAll then
-            pcall(function() Notification.ClearAll() end)
-        end
-    end,
-}
-
---========================================================--
--- KEY UI
+-- KEY UI — SIMPLE, LANGSUNG UKURAN PENUH
 --========================================================--
 local function ShowKeyUI()
-    -- 🐛 FIX #2: Clear notif dulu
-    SafeNotif.ClearAll()
-    task.wait(0.3)
+    -- Hapus GUI lama kalau ada
+    local old = CoreGui:FindFirstChild("MawwwKeyUI")
+    if old then old:Destroy() end
 
     local gui = Instance.new("ScreenGui")
     gui.Name = "MawwwKeyUI"
@@ -118,16 +84,18 @@ local function ShowKeyUI()
     gui.DisplayOrder = 9999
     pcall(function() gui.Parent = CoreGui end)
 
+    -- Overlay gelap
     local overlay = Instance.new("Frame")
     overlay.Size = UDim2.new(1, 0, 1, 0)
     overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    overlay.BackgroundTransparency = 1
+    overlay.BackgroundTransparency = 0.5
     overlay.BorderSizePixel = 0
     overlay.ZIndex = 0
     overlay.Parent = gui
 
-    TweenService:Create(overlay, TweenInfo.new(0.5), { BackgroundTransparency = 0.5 }):Play()
-
+    --======================================================--
+    -- FRAME UTAMA — LANGSUNG UKURAN PENUH (NO ANIMATION DELAY)
+    --======================================================--
     local FRAME_W = 440
     local FRAME_H = 400
 
@@ -135,20 +103,16 @@ local function ShowKeyUI()
     frame.Name = "MainFrame"
     frame.AnchorPoint = Vector2.new(0.5, 0.5)
     frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-    frame.Size = UDim2.fromOffset(0, 0)
+    frame.Size = UDim2.fromOffset(FRAME_W, FRAME_H)  -- 🎯 LANGSUNG FULL
     frame.BackgroundColor3 = Color3.fromRGB(12, 8, 18)
     frame.BackgroundTransparency = 0.05
     frame.BorderSizePixel = 0
     frame.ZIndex = 10
     frame.Parent = gui
 
-    task.delay(0.1, function()
-        TweenService:Create(frame, TweenInfo.new(0.7, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Size = UDim2.fromOffset(FRAME_W, FRAME_H),
-        }):Play()
-    end)
-
-    Instance.new("UICorner", { CornerRadius = UDim.new(0, 16), Parent = frame })
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 16)
+    corner.Parent = frame
 
     local stroke = Instance.new("UIStroke")
     stroke.Color = Color3.fromRGB(180, 110, 255)
@@ -165,55 +129,38 @@ local function ShowKeyUI()
     })
     strokeGrad.Parent = stroke
 
+    -- Rotasi gradient (opsional, bisa dihapus kalau bikin lag)
     task.spawn(function()
         while strokeGrad.Parent do
-            for i = 0, 360, 3 do
+            for i = 0, 360, 5 do
                 if not strokeGrad.Parent then break end
                 strokeGrad.Rotation = i
-                task.wait(0.03)
+                task.wait(0.05)
             end
         end
     end)
 
+    --======================================================--
     -- LOGO
+    --======================================================--
     local logoFrame = Instance.new("Frame")
     logoFrame.Size = UDim2.fromOffset(130, 130)
     logoFrame.Position = UDim2.new(0.5, -65, 0, 20)
     logoFrame.BackgroundTransparency = 1
+    logoFrame.ZIndex = 11
     logoFrame.Parent = frame
-
-    local logoGlow = Instance.new("ImageLabel")
-    logoGlow.Size = UDim2.new(1, 30, 1, 30)
-    logoGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
-    logoGlow.AnchorPoint = Vector2.new(0.5, 0.5)
-    logoGlow.BackgroundTransparency = 1
-    logoGlow.Image = "rbxassetid://5028857084"
-    logoGlow.ImageColor3 = Color3.fromRGB(180, 110, 255)
-    logoGlow.ImageTransparency = 0.4
-    logoGlow.Parent = logoFrame
 
     local logo = Instance.new("ImageLabel")
     logo.Size = UDim2.fromScale(1, 1)
     logo.BackgroundTransparency = 1
     logo.Image = "rbxassetid://" .. KEY_LOGO_ID
     logo.ScaleType = Enum.ScaleType.Fit
+    logo.ZIndex = 12
     logo.Parent = logoFrame
 
-    task.spawn(function()
-        while logoFrame.Parent do
-            TweenService:Create(logoFrame, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                Position = UDim2.new(0.5, -65, 0, 12),
-            }):Play()
-            task.wait(1.2)
-            if not logoFrame.Parent then break end
-            TweenService:Create(logoFrame, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                Position = UDim2.new(0.5, -65, 0, 20),
-            }):Play()
-            task.wait(1.2)
-        end
-    end)
-
+    --======================================================--
     -- TITLE
+    --======================================================--
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, -20, 0, 30)
     title.Position = UDim2.fromOffset(10, 158)
@@ -222,6 +169,7 @@ local function ShowKeyUI()
     title.TextSize = 24
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.Text = "MAWWWHUB"
+    title.ZIndex = 11
     title.Parent = frame
 
     local titleGrad = Instance.new("UIGradient")
@@ -241,16 +189,23 @@ local function ShowKeyUI()
     sub.TextSize = 11
     sub.TextColor3 = Color3.fromRGB(200, 200, 210)
     sub.Text = "Masukkan key untuk mengakses script"
+    sub.ZIndex = 11
     sub.Parent = frame
 
+    --======================================================--
     -- INPUT
+    --======================================================--
     local inputHolder = Instance.new("Frame")
     inputHolder.Size = UDim2.new(1, -20, 0, 40)
     inputHolder.Position = UDim2.fromOffset(10, 218)
     inputHolder.BackgroundColor3 = Color3.fromRGB(28, 22, 38)
     inputHolder.BorderSizePixel = 0
+    inputHolder.ZIndex = 11
     inputHolder.Parent = frame
-    Instance.new("UICorner", { CornerRadius = UDim.new(0, 8), Parent = inputHolder })
+
+    local inCorner = Instance.new("UICorner")
+    inCorner.CornerRadius = UDim.new(0, 8)
+    inCorner.Parent = inputHolder
 
     local inStroke = Instance.new("UIStroke")
     inStroke.Color = Color3.fromRGB(180, 110, 255)
@@ -267,9 +222,12 @@ local function ShowKeyUI()
     input.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
     input.Text = ""
     input.ClearTextOnFocus = false
+    input.ZIndex = 12
     input.Parent = inputHolder
 
+    --======================================================--
     -- STATUS
+    --======================================================--
     local status = Instance.new("TextLabel")
     status.Size = UDim2.new(1, -20, 0, 18)
     status.Position = UDim2.fromOffset(10, 262)
@@ -278,9 +236,12 @@ local function ShowKeyUI()
     status.TextSize = 10
     status.TextColor3 = Color3.fromRGB(255, 100, 100)
     status.Text = ""
+    status.ZIndex = 11
     status.Parent = frame
 
+    --======================================================--
     -- VERIFY BUTTON
+    --======================================================--
     local verifyBtn = Instance.new("TextButton")
     verifyBtn.Size = UDim2.new(1, -20, 0, 42)
     verifyBtn.Position = UDim2.fromOffset(10, 285)
@@ -291,8 +252,12 @@ local function ShowKeyUI()
     verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     verifyBtn.Text = "🔓 VERIFY KEY"
     verifyBtn.AutoButtonColor = false
+    verifyBtn.ZIndex = 11
     verifyBtn.Parent = frame
-    Instance.new("UICorner", { CornerRadius = UDim.new(0, 8), Parent = verifyBtn })
+
+    local vCorner = Instance.new("UICorner")
+    vCorner.CornerRadius = UDim.new(0, 8)
+    vCorner.Parent = verifyBtn
 
     local vGrad = Instance.new("UIGradient")
     vGrad.Color = ColorSequence.new({
@@ -302,7 +267,9 @@ local function ShowKeyUI()
     vGrad.Rotation = 45
     vGrad.Parent = verifyBtn
 
-    -- BUY + CLEAR
+    --======================================================--
+    -- BELI + CLEAR
+    --======================================================--
     local buyBtn = Instance.new("TextButton")
     buyBtn.Size = UDim2.new(0.5, -15, 0, 36)
     buyBtn.Position = UDim2.fromOffset(10, 340)
@@ -313,8 +280,12 @@ local function ShowKeyUI()
     buyBtn.TextColor3 = Color3.fromRGB(180, 110, 255)
     buyBtn.Text = "🔗 BELI KEY"
     buyBtn.AutoButtonColor = false
+    buyBtn.ZIndex = 11
     buyBtn.Parent = frame
-    Instance.new("UICorner", { CornerRadius = UDim.new(0, 8), Parent = buyBtn })
+
+    local bCorner = Instance.new("UICorner")
+    bCorner.CornerRadius = UDim.new(0, 8)
+    bCorner.Parent = buyBtn
 
     local bStroke = Instance.new("UIStroke")
     bStroke.Color = Color3.fromRGB(180, 110, 255)
@@ -331,22 +302,27 @@ local function ShowKeyUI()
     clearBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
     clearBtn.Text = "🗑️ CLEAR SAVED"
     clearBtn.AutoButtonColor = false
+    clearBtn.ZIndex = 11
     clearBtn.Parent = frame
-    Instance.new("UICorner", { CornerRadius = UDim.new(0, 8), Parent = clearBtn })
+
+    local cCorner = Instance.new("UICorner")
+    cCorner.CornerRadius = UDim.new(0, 8)
+    cCorner.Parent = clearBtn
 
     local cStroke = Instance.new("UIStroke")
     cStroke.Color = Color3.fromRGB(255, 100, 100)
     cStroke.Thickness = 1
     cStroke.Parent = clearBtn
 
+    --======================================================--
     -- HANDLERS
+    --======================================================--
     local isVerifying = false
 
     verifyBtn.MouseButton1Click:Connect(function()
         if isVerifying then return end
         if not KeySystem then
             status.Text = "❌ KeySystem tidak loaded!"
-            status.TextColor3 = Color3.fromRGB(255, 100, 100)
             return
         end
         isVerifying = true
@@ -358,31 +334,18 @@ local function ShowKeyUI()
 
         task.wait(0.2)
 
-        local valid, msg = false, "Unknown error"
-        local ok, err = pcall(function()
+        local valid, msg = false, "Error"
+        pcall(function()
             valid, msg = KeySystem:ValidateKey(key)
         end)
-
-        if not ok then
-            status.Text = "❌ Error: " .. tostring(err)
-            status.TextColor3 = Color3.fromRGB(255, 100, 100)
-            verifyBtn.Text = "🔓 VERIFY KEY"
-            isVerifying = false
-            return
-        end
 
         if valid then
             status.Text = msg
             status.TextColor3 = Color3.fromRGB(100, 255, 150)
             verifyBtn.Text = "✅ SUCCESS"
 
-            SafeNotif.KeyActivated()
+            showNotif("KEY ACTIVATED", Color3.fromRGB(80, 230, 120))
             saveKey(key)
-
-            TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-                Size = UDim2.fromOffset(0, 0),
-            }):Play()
-            TweenService:Create(overlay, TweenInfo.new(0.4), { BackgroundTransparency = 1 }):Play()
 
             task.wait(1)
             gui:Destroy()
@@ -392,8 +355,6 @@ local function ShowKeyUI()
             status.Text = msg
             status.TextColor3 = Color3.fromRGB(255, 100, 100)
             verifyBtn.Text = "🔓 VERIFY KEY"
-
-            SafeNotif.KeyNotActive()
             isVerifying = false
         end
     end)
@@ -437,7 +398,10 @@ local function ShowKeyUI()
     UserInputService.InputChanged:Connect(function(input2)
         if input2 == dragInput and dragging then
             local d = input2.Position - dragStart
-            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
+            frame.Position = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + d.X,
+                startPos.Y.Scale, startPos.Y.Offset + d.Y
+            )
         end
     end)
     UserInputService.InputEnded:Connect(function(input2)
@@ -446,63 +410,37 @@ local function ShowKeyUI()
             dragging = false
         end
     end)
+
+    return gui
 end
 
 --========================================================--
--- 🚀 MAIN FLOW
+-- 🚀 MAIN FLOW — KALAU ADA KEY, AUTO-LOGIN. KALAU TIDAK, KEY UI
 --========================================================--
-print("[MawwwHub] Script starting...")
+print("[MawwwHub] Starting...")
 
-local hasSavedKey = false
-local savedKey = nil
-
-pcall(function()
-    savedKey = getSavedKey()
-    hasSavedKey = savedKey ~= nil
-end)
-
-print("[MawwwHub] Has saved key: " .. tostring(hasSavedKey))
-
-if hasSavedKey then
-    SafeNotif.Loading("VERIFYING KEY...", 4)
-else
-    SafeNotif.Loading("LOADING...", 3)
-end
-
-task.wait(1.5)
-
-local autoLoggedIn = false
+local savedKey = getSavedKey()
 
 if savedKey and KeySystem then
-    print("[MawwwHub] Validating saved key...")
-    
-    local valid, msg = false, "unknown"
-    pcall(function()
-        valid, msg = KeySystem:ValidateKey(savedKey)
-    end)
-    
-    print("[MawwwHub] Validation result: " .. tostring(valid) .. " | " .. tostring(msg))
-    
-    if valid then
-        SafeNotif.KeyActivated()
-        task.wait(1.5)
-        loadMainScript()
-        autoLoggedIn = true
-    else
-        SafeNotif.KeyNotActive()
-        clearSavedKey()
-        task.wait(1.5)
-    end
-end
+    print("[MawwwHub] Found saved key, validating...")
 
-if not autoLoggedIn then
-    print("[MawwwHub] Showing key UI...")
-    task.wait(0.5)
-    
-    local ok, err = pcall(function() ShowKeyUI() end)
-    if not ok then
-        warn("[MawwwHub] ERROR in ShowKeyUI: " .. tostring(err))
+    local valid = false
+    pcall(function()
+        valid = KeySystem:ValidateKey(savedKey)
+    end)
+
+    if valid then
+        print("[MawwwHub] Auto-login success")
+        showNotif("KEY ACTIVATED", Color3.fromRGB(80, 230, 120))
+        task.wait(2)
+        loadMainScript()
     else
-        print("[MawwwHub] Key UI shown successfully")
+        print("[MawwwHub] Saved key invalid, clearing...")
+        clearSavedKey()
+        task.wait(0.5)
+        ShowKeyUI()
     end
+else
+    print("[MawwwHub] No saved key, showing Key UI")
+    ShowKeyUI()
 end

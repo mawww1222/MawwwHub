@@ -1,5 +1,5 @@
 --========================================================--
--- MAWWWHUB KEY SYSTEM (Railway API) — BUG FIXED
+-- MAWWWHUB KEY SYSTEM (Railway API) — FIXED
 --========================================================--
 local KeySystem = {}
 
@@ -8,21 +8,6 @@ local KeySystem = {}
 --========================================================--
 local BASE_URL = "https://mawww-key-server-production.up.railway.app"
 KeySystem.BASE_URL = BASE_URL
-
---========================================================--
--- SAVED KEY HELPERS
---========================================================--
-function KeySystem:HasSavedKey()
-    local ok, result = pcall(function()
-        if isfile and isfile("MawwwHub/key.txt") then
-            local k = readfile("MawwwHub/key.txt")
-            if k and k ~= "" then return true, k end
-        end
-        return false, nil
-    end)
-    if ok then return result end
-    return false, nil
-end
 
 --========================================================--
 -- HWID

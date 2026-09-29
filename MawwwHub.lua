@@ -1,13 +1,16 @@
 --========================================================--
--- MAWWWHUB KEY GATE — FIXED (No Pop-in Bug)
--- Key UI muncul duluan, notif simple
+-- MAWWWHUB KEY GATE — FIXED (Frame Size Bug Solved)
 --========================================================--
 local BASE = "https://raw.githubusercontent.com/mawww1222/MawwwHub/main/"
 
--- Load dengan pcall
+-- Load modules dengan pcall guard
 local KeySystem, Notification
-pcall(function() KeySystem = loadstring(game:HttpGet(BASE .. "KeySystem.lua?t=" .. tick()))() end)
-pcall(function() Notification = loadstring(game:HttpGet(BASE .. "Notification.lua?t=" .. tick()))() end)
+pcall(function()
+    KeySystem = loadstring(game:HttpGet(BASE .. "KeySystem.lua?t=" .. tick()))()
+end)
+pcall(function()
+    Notification = loadstring(game:HttpGet(BASE .. "Notification.lua?t=" .. tick()))()
+end)
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -19,7 +22,7 @@ local Player = Players.LocalPlayer
 local KEY_LOGO_ID = "88250532753444"
 
 --========================================================--
--- SAVED KEY
+-- SAVED KEY HELPERS
 --========================================================--
 local function getSavedKey()
     local ok, k = pcall(function()
@@ -36,7 +39,9 @@ end
 local function saveKey(key)
     pcall(function()
         if writefile then
-            if isfolder and not isfolder("MawwwHub") then makefolder("MawwwHub") end
+            if isfolder and not isfolder("MawwwHub") then
+                makefolder("MawwwHub")
+            end
             writefile("MawwwHub/key.txt", key)
         end
     end)
@@ -51,25 +56,28 @@ local function clearSavedKey()
 end
 
 local function loadMainScript()
-    pcall(function()
+    local ok, err = pcall(function()
         loadstring(game:HttpGet(BASE .. "MawwwHub_Main.lua?t=" .. tick()))()
     end)
+    if not ok then
+        warn("[MawwwHub] Gagal load main script: " .. tostring(err))
+    end
 end
 
 --========================================================--
--- SAFE NOTIF
+-- SAFE NOTIF WRAPPER
 --========================================================--
-local function showNotif(text, color)
+local function showNotif(text)
     if Notification and Notification.Loading then
         pcall(function()
             if Notification.ClearAll then Notification.ClearAll() end
-            Notification.Loading(text, 4)
+            Notification.Loading(text, 3)
         end)
     end
 end
 
 --========================================================--
--- KEY UI — SIMPLE, LANGSUNG UKURAN PENUH
+-- KEY UI — FIXED (Langsung Full Size, No Pop-in Bug)
 --========================================================--
 local function ShowKeyUI()
     -- Hapus GUI lama kalau ada
@@ -94,7 +102,7 @@ local function ShowKeyUI()
     overlay.Parent = gui
 
     --======================================================--
-    -- FRAME UTAMA — LANGSUNG UKURAN PENUH (NO ANIMATION DELAY)
+    -- FRAME UTAMA — LANGSUNG UKURAN PENUH (FIX BUG)
     --======================================================--
     local FRAME_W = 440
     local FRAME_H = 400
@@ -129,7 +137,7 @@ local function ShowKeyUI()
     })
     strokeGrad.Parent = stroke
 
-    -- Rotasi gradient (opsional, bisa dihapus kalau bikin lag)
+    -- Rotasi gradient (opsional)
     task.spawn(function()
         while strokeGrad.Parent do
             for i = 0, 360, 5 do
@@ -140,9 +148,7 @@ local function ShowKeyUI()
         end
     end)
 
-    --======================================================--
     -- LOGO
-    --======================================================--
     local logoFrame = Instance.new("Frame")
     logoFrame.Size = UDim2.fromOffset(130, 130)
     logoFrame.Position = UDim2.new(0.5, -65, 0, 20)
@@ -158,9 +164,7 @@ local function ShowKeyUI()
     logo.ZIndex = 12
     logo.Parent = logoFrame
 
-    --======================================================--
     -- TITLE
-    --======================================================--
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, -20, 0, 30)
     title.Position = UDim2.fromOffset(10, 158)
@@ -192,9 +196,7 @@ local function ShowKeyUI()
     sub.ZIndex = 11
     sub.Parent = frame
 
-    --======================================================--
     -- INPUT
-    --======================================================--
     local inputHolder = Instance.new("Frame")
     inputHolder.Size = UDim2.new(1, -20, 0, 40)
     inputHolder.Position = UDim2.fromOffset(10, 218)
@@ -225,9 +227,7 @@ local function ShowKeyUI()
     input.ZIndex = 12
     input.Parent = inputHolder
 
-    --======================================================--
     -- STATUS
-    --======================================================--
     local status = Instance.new("TextLabel")
     status.Size = UDim2.new(1, -20, 0, 18)
     status.Position = UDim2.fromOffset(10, 262)
@@ -239,9 +239,7 @@ local function ShowKeyUI()
     status.ZIndex = 11
     status.Parent = frame
 
-    --======================================================--
     -- VERIFY BUTTON
-    --======================================================--
     local verifyBtn = Instance.new("TextButton")
     verifyBtn.Size = UDim2.new(1, -20, 0, 42)
     verifyBtn.Position = UDim2.fromOffset(10, 285)
@@ -267,9 +265,7 @@ local function ShowKeyUI()
     vGrad.Rotation = 45
     vGrad.Parent = verifyBtn
 
-    --======================================================--
     -- BELI + CLEAR
-    --======================================================--
     local buyBtn = Instance.new("TextButton")
     buyBtn.Size = UDim2.new(0.5, -15, 0, 36)
     buyBtn.Position = UDim2.fromOffset(10, 340)
@@ -344,12 +340,12 @@ local function ShowKeyUI()
             status.TextColor3 = Color3.fromRGB(100, 255, 150)
             verifyBtn.Text = "✅ SUCCESS"
 
-            showNotif("KEY ACTIVATED", Color3.fromRGB(80, 230, 120))
+            showNotif("KEY ACTIVATED")
             saveKey(key)
 
-            task.wait(1)
+            task.wait(1.5)
             gui:Destroy()
-            task.wait(2)
+            task.wait(1.5)
             loadMainScript()
         else
             status.Text = msg
@@ -415,7 +411,7 @@ local function ShowKeyUI()
 end
 
 --========================================================--
--- 🚀 MAIN FLOW — KALAU ADA KEY, AUTO-LOGIN. KALAU TIDAK, KEY UI
+-- 🚀 MAIN FLOW — KEY UI DULUAN, NOTIF CUMA KALAU VALID
 --========================================================--
 print("[MawwwHub] Starting...")
 
@@ -431,7 +427,7 @@ if savedKey and KeySystem then
 
     if valid then
         print("[MawwwHub] Auto-login success")
-        showNotif("KEY ACTIVATED", Color3.fromRGB(80, 230, 120))
+        showNotif("KEY ACTIVATED")
         task.wait(2)
         loadMainScript()
     else

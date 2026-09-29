@@ -1,11 +1,14 @@
 --========================================================--
--- MAWWWHUB KEY GATE
+-- MAWWWHUB KEY GATE + WELCOME NOTIFICATION
 --========================================================--
 local BASE = "https://raw.githubusercontent.com/mawww1222/MawwwHub/main/"
+
+-- Load modules
 local KeySystem = loadstring(game:HttpGet(BASE .. "KeySystem.lua?t=" .. tick()))()
+local Notification = loadstring(game:HttpGet(BASE .. "Notification.lua?t=" .. tick()))()
 
 --========================================================--
--- SAVED KEY
+-- SAVED KEY HELPERS
 --========================================================--
 local function getSavedKey()
     if isfile and isfile("MawwwHub/key.txt") then
@@ -17,7 +20,9 @@ end
 
 local function saveKey(key)
     if writefile then
-        if isfolder and not isfolder("MawwwHub") then makefolder("MawwwHub") end
+        if isfolder and not isfolder("MawwwHub") then
+            makefolder("MawwwHub")
+        end
         pcall(writefile, "MawwwHub/key.txt", key)
     end
 end
@@ -32,20 +37,79 @@ local function loadMainScript()
     loadstring(game:HttpGet(BASE .. "MawwwHub_Main.lua?t=" .. tick()))()
 end
 
--- Auto-load kalau ada key tersimpan
-local savedKey = getSavedKey()
-if savedKey then
-    local valid = KeySystem:ValidateKey(savedKey)
+--========================================================--
+-- 🔔 STEP 1: WELCOME NOTIFICATION (Muncul pertama kali)
+--========================================================--
+local function ShowWelcomeNotification()
+    local hasSaved = getSavedKey() ~= nil
+
+    -- Tampilkan notifikasi welcome
+    Notification.WelcomePopup({
+        HasKey = hasSaved,
+    })
+
+    -- Notifikasi tambahan setelah 2 detik
+    task.delay(2, function()
+        if hasSaved then
+            Notification.Info(
+                "🔍 Memverifikasi Key",
+                "Sistem sedang memeriksa key kamu ke server...\n\n🌐 Server: Railway API",
+                4
+            )
+        else
+            Notification.Info(
+                "📖 Cara Mendapatkan Key",
+                "Belum punya key?\n\n" ..
+                "1️⃣ Klik tombol BELI KEY di UI\n" ..
+                "2️⃣ Chat owner via WhatsApp\n" ..
+                "3️⃣ Masukkan key yang kamu terima\n\n" ..
+                "💬 Hubungi owner untuk info harga.",
+                8
+            )
+        end
+    end)
+end
+
+--========================================================--
+-- 🔔 STEP 2: AUTO-LOGIN CHECK (Jika ada key tersimpan)
+--========================================================--
+local function TryAutoLogin()
+    local savedKey = getSavedKey()
+    if not savedKey then
+        return false
+    end
+
+    local valid, msg, data = KeySystem:ValidateKey(savedKey)
+
     if valid then
+        Notification.Success(
+            "🎉 Auto-Login Berhasil!",
+            "Selamat datang kembali!\n\n" ..
+            "📝 Key: " .. savedKey:sub(1, 15) .. "...\n" ..
+            "⏱️ Status: Key valid\n" ..
+            "🎯 Script akan dimuat dalam 1.5 detik...",
+            5
+        )
+
+        task.wait(1.5)
         loadMainScript()
-        return
+        return true
     else
+        Notification.Error(
+            "❌ Key Tidak Valid",
+            "Key kamu sudah expired atau tidak valid.\n\n" ..
+            "🔧 Silakan masukkan key baru di UI.\n" ..
+            "📝 Pesan server: " .. (msg or "-") .. "\n\n" ..
+            "💡 Menghapus key lama...",
+            6
+        )
         clearSavedKey()
+        return false
     end
 end
 
 --========================================================--
--- KEY UI
+-- 🔔 STEP 3: KEY UI (Jika belum ada key / invalid)
 --========================================================--
 local function ShowKeyUI()
     local gui = Instance.new("ScreenGui")
@@ -135,7 +199,7 @@ local function ShowKeyUI()
     status.Text = ""
     status.Parent = frame
 
-    -- Verify
+    -- Verify button
     local verifyBtn = Instance.new("TextButton")
     verifyBtn.Size = UDim2.new(1, -20, 0, 40)
     verifyBtn.Position = UDim2.fromOffset(10, 158)
@@ -239,14 +303,33 @@ local function ShowKeyUI()
             status.Text = msg
             status.TextColor3 = Color3.fromRGB(100, 255, 150)
             verifyBtn.Text = "✅ SUCCESS"
+
+            Notification.Success(
+                "🎉 Key Berhasil Diverifikasi!",
+                "Selamat bergabung di MawwwHub!\n\n" ..
+                "📝 Key: " .. key:sub(1, 15) .. "...\n" ..
+                "⏱️ Status: Aktif\n" ..
+                "🎯 Script akan dimuat sekarang...",
+                5
+            )
+
             saveKey(key)
-            task.wait(0.8)
+            task.wait(1)
             gui:Destroy()
             loadMainScript()
         else
             status.Text = msg
             status.TextColor3 = Color3.fromRGB(255, 100, 100)
             verifyBtn.Text = "VERIFY KEY"
+
+            Notification.Error(
+                "❌ Verifikasi Gagal",
+                "Key yang kamu masukkan tidak valid.\n\n" ..
+                "📝 Pesan: " .. (msg or "-") .. "\n\n" ..
+                "💡 Pastikan key sudah benar atau beli key baru.",
+                6
+            )
+
             isVerifying = false
         end
     end)
@@ -257,6 +340,14 @@ local function ShowKeyUI()
             setclipboard(link)
             status.Text = "🔗 Link beli dicopy!"
             status.TextColor3 = Color3.fromRGB(100, 200, 255)
+
+            Notification.Info(
+                "🔗 Link Beli Key Dicopy!",
+                "Link sudah dicopy ke clipboard.\n\n" ..
+                "📱 Buka browser / chat owner untuk beli key.\n" ..
+                "💰 Harga terjangkau, bisa permanent atau harian!",
+                5
+            )
         else
             status.Text = link
             status.TextColor3 = Color3.fromRGB(100, 200, 255)
@@ -267,6 +358,13 @@ local function ShowKeyUI()
         clearSavedKey()
         status.Text = "🗑️ Saved key dihapus!"
         status.TextColor3 = Color3.fromRGB(255, 200, 100)
+
+        Notification.Warning(
+            "🗑️ Key Tersimpan Dihapus",
+            "Key yang tersimpan sudah dihapus dari device kamu.\n\n" ..
+            "📝 Kamu perlu input key baru lain kali.",
+            4
+        )
     end)
 
     input.FocusLost:Connect(function(enter)
@@ -306,4 +404,21 @@ local function ShowKeyUI()
     end)
 end
 
-ShowKeyUI()
+--========================================================--
+-- 🚀 MAIN FLOW: Eksekusi saat script di-load
+--========================================================--
+
+-- STEP 1: Tampilkan notifikasi welcome pertama
+ShowWelcomeNotification()
+
+-- STEP 2: Tunggu 1 detik (biar user baca notif welcome)
+task.wait(1)
+
+-- STEP 3: Coba auto-login kalau ada key tersimpan
+local autoLoggedIn = TryAutoLogin()
+
+-- STEP 4: Kalau auto-login gagal, tampilkan UI input key
+if not autoLoggedIn then
+    task.wait(0.5)
+    ShowKeyUI()
+end

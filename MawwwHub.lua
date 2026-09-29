@@ -1,5 +1,5 @@
 --========================================================--
--- MAWWWHUB KEY GATE — Center Position + Logo
+-- MAWWWHUB KEY GATE — Simple Notification Edition
 --========================================================--
 local BASE = "https://raw.githubusercontent.com/mawww1222/MawwwHub/main/"
 
@@ -14,9 +14,9 @@ local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 
 --========================================================--
--- 🎨 ASSET FOTO (GANTI DI SINI KALAU MAU)
+-- 🎨 ASSET FOTO
 --========================================================--
-local KEY_LOGO_ID = "88250532753444"  -- Foto logo MawwwHub
+local KEY_LOGO_ID = "88250532753444"
 
 --========================================================--
 -- SAVED KEY
@@ -49,7 +49,7 @@ local function loadMainScript()
 end
 
 --========================================================--
--- ✨ KEY UI — TENGAH LAYAR
+-- KEY UI — POSISI TENGAH LAYAR
 --========================================================--
 local function ShowKeyUI()
     local gui = Instance.new("ScreenGui")
@@ -71,7 +71,7 @@ local function ShowKeyUI()
 
     TweenService:Create(overlay, TweenInfo.new(0.5), { BackgroundTransparency = 0.4 }):Play()
 
-    -- Blob 1 (glow background)
+    -- Blob 1
     local blob1 = Instance.new("Frame")
     blob1.Size = UDim2.fromOffset(400, 400)
     blob1.Position = UDim2.new(0.2, 0, 0.3, 0)
@@ -122,23 +122,22 @@ local function ShowKeyUI()
     end)
 
     --======================================================--
-    -- FRAME UTAMA — POSISI TENGAH LAYAR
+    -- FRAME UTAMA (TENGAH LAYAR)
     --======================================================--
     local FRAME_W = 440
     local FRAME_H = 400
 
     local frame = Instance.new("Frame")
     frame.Name = "MainFrame"
-    frame.AnchorPoint = Vector2.new(0.5, 0.5)          -- 🎯 anchor ke tengah
-    frame.Position = UDim2.new(0.5, 0, 0.5, 0)         -- 🎯 tepat di tengah layar
-    frame.Size = UDim2.fromOffset(0, 0)                -- start dari 0 untuk pop-in
+    frame.AnchorPoint = Vector2.new(0.5, 0.5)
+    frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    frame.Size = UDim2.fromOffset(0, 0)
     frame.BackgroundColor3 = Color3.fromRGB(12, 8, 18)
     frame.BackgroundTransparency = 0.05
     frame.BorderSizePixel = 0
     frame.ZIndex = 10
     frame.Parent = gui
 
-    -- Pop-in animation (scale dari tengah)
     task.delay(0.1, function()
         TweenService:Create(frame, TweenInfo.new(0.7, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
             Size = UDim2.fromOffset(FRAME_W, FRAME_H),
@@ -153,7 +152,6 @@ local function ShowKeyUI()
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     stroke.Parent = frame
 
-    -- Rotating gradient border
     local strokeGrad = Instance.new("UIGradient")
     strokeGrad.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0.00, Color3.fromRGB(180, 110, 255)),
@@ -174,9 +172,7 @@ local function ShowKeyUI()
         end
     end)
 
-    --======================================================--
-    -- 🖼️ LOGO MAWWWHUB
-    --======================================================--
+    -- LOGO
     local logoFrame = Instance.new("Frame")
     logoFrame.Size = UDim2.fromOffset(130, 130)
     logoFrame.Position = UDim2.new(0.5, -65, 0, 20)
@@ -184,7 +180,6 @@ local function ShowKeyUI()
     logoFrame.ZIndex = 11
     logoFrame.Parent = frame
 
-    -- Logo glow di belakang
     local logoGlow = Instance.new("ImageLabel")
     logoGlow.Size = UDim2.new(1, 30, 1, 30)
     logoGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -196,7 +191,6 @@ local function ShowKeyUI()
     logoGlow.ZIndex = 10
     logoGlow.Parent = logoFrame
 
-    -- Foto logo
     local logo = Instance.new("ImageLabel")
     logo.Size = UDim2.fromScale(1, 1)
     logo.BackgroundTransparency = 1
@@ -205,7 +199,6 @@ local function ShowKeyUI()
     logo.ZIndex = 12
     logo.Parent = logoFrame
 
-    -- Floating animation
     task.spawn(function()
         while logoFrame.Parent do
             TweenService:Create(logoFrame, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
@@ -226,7 +219,7 @@ local function ShowKeyUI()
         end
     end)
 
-    -- Sparkle particles
+    -- Sparkle
     task.spawn(function()
         local sparkleIds = {"rbxassetid://5014978988", "rbxassetid://5014979922"}
         while logoFrame.Parent do
@@ -259,9 +252,7 @@ local function ShowKeyUI()
         end
     end)
 
-    --======================================================--
     -- TITLE
-    --======================================================--
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, -20, 0, 30)
     title.Position = UDim2.fromOffset(10, 158)
@@ -303,9 +294,7 @@ local function ShowKeyUI()
         TweenService:Create(sub, TweenInfo.new(0.5), { TextTransparency = 0 }):Play()
     end)
 
-    --======================================================--
     -- INPUT
-    --======================================================--
     local inputHolder = Instance.new("Frame")
     inputHolder.Size = UDim2.new(1, -20, 0, 40)
     inputHolder.Position = UDim2.fromOffset(10, 218)
@@ -349,9 +338,7 @@ local function ShowKeyUI()
         TweenService:Create(inStroke, TweenInfo.new(0.2), { Color = Color3.fromRGB(180, 110, 255), Thickness = 1.5 }):Play()
     end)
 
-    --======================================================--
     -- STATUS
-    --======================================================--
     local status = Instance.new("TextLabel")
     status.Size = UDim2.new(1, -20, 0, 18)
     status.Position = UDim2.fromOffset(10, 262)
@@ -364,9 +351,7 @@ local function ShowKeyUI()
     status.ZIndex = 11
     status.Parent = frame
 
-    --======================================================--
     -- VERIFY BUTTON
-    --======================================================--
     local verifyBtn = Instance.new("TextButton")
     verifyBtn.Size = UDim2.new(1, -20, 0, 42)
     verifyBtn.Position = UDim2.fromOffset(10, 285)
@@ -395,9 +380,7 @@ local function ShowKeyUI()
         TweenService:Create(verifyBtn, TweenInfo.new(0.4), { BackgroundTransparency = 0, TextTransparency = 0 }):Play()
     end)
 
-    --======================================================--
     -- BELI + CLEAR BUTTON
-    --======================================================--
     local buyBtn = Instance.new("TextButton")
     buyBtn.Size = UDim2.new(0.5, -15, 0, 36)
     buyBtn.Position = UDim2.fromOffset(10, 340)
@@ -472,17 +455,13 @@ local function ShowKeyUI()
             status.TextColor3 = Color3.fromRGB(100, 255, 150)
             verifyBtn.Text = "✅ SUCCESS"
 
-            -- Pop-out animation ke tengah
+            -- Pop-out + notif sukses
             TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
                 Size = UDim2.fromOffset(0, 0),
             }):Play()
             TweenService:Create(overlay, TweenInfo.new(0.4), { BackgroundTransparency = 1 }):Play()
 
-            Notification.Celebrate(
-                "KEY VALID!",
-                "Selamat " .. (Player.DisplayName or Player.Name) ..
-                "!\n\nKey berhasil diverifikasi.\nScript akan dimuat..."
-            )
+            Notification.KeyActivated()
 
             saveKey(key)
             task.wait(2.5)
@@ -493,7 +472,7 @@ local function ShowKeyUI()
             status.TextColor3 = Color3.fromRGB(255, 100, 100)
             verifyBtn.Text = "🔓 VERIFY KEY"
 
-            -- Shake animation
+            -- Shake
             task.spawn(function()
                 local origPos = frame.Position
                 for i = 1, 3 do
@@ -505,11 +484,7 @@ local function ShowKeyUI()
                 TweenService:Create(frame, TweenInfo.new(0.1), { Position = origPos }):Play()
             end)
 
-            Notification.Error(
-                "Verifikasi Gagal",
-                "Key tidak valid.\n\nPesan: " .. (msg or "-"),
-                5
-            )
+            Notification.KeyNotActive()
             isVerifying = false
         end
     end)
@@ -521,7 +496,6 @@ local function ShowKeyUI()
             status.Text = "🔗 Link beli dicopy!"
             status.TextColor3 = Color3.fromRGB(100, 200, 255)
             status.TextTransparency = 0
-            Notification.Info("Link Dicopy!", "Link beli sudah dicopy.\nBuka browser untuk beli key.", 4)
         end
     end)
 
@@ -530,7 +504,6 @@ local function ShowKeyUI()
         status.Text = "🗑️ Saved key dihapus!"
         status.TextColor3 = Color3.fromRGB(255, 200, 100)
         status.TextTransparency = 0
-        Notification.Warning("Key Dihapus", "Saved key sudah dihapus.", 4)
     end)
 
     input.FocusLost:Connect(function(enter)
@@ -570,16 +543,20 @@ end
 --========================================================--
 -- 🚀 MAIN FLOW
 --========================================================--
-local hasSavedKey = getSavedKey() ~= nil
-Notification.WelcomeImage({ HasKey = hasSavedKey })
 
-local loadingCard = nil
+-- STEP 1: Tampilkan loading notif
+local hasSavedKey = getSavedKey() ~= nil
+
 if hasSavedKey then
-    task.wait(2.5)
-    loadingCard = Notification.Loading("Memverifikasi Key", "Menghubungi server Railway...")
+    Notification.Loading("VERIFYING KEY...", 5)
+else
+    Notification.Loading("LOADING...", 5)
 end
 
-task.wait(1)
+-- STEP 2: Tunggu sebentar
+task.wait(2)
+
+-- STEP 3: Auto-login
 local savedKey = getSavedKey()
 local autoLoggedIn = false
 
@@ -587,43 +564,18 @@ if savedKey then
     local valid, msg = KeySystem:ValidateKey(savedKey)
 
     if valid then
-        if loadingCard then
-            Notification.UpdateLoading(loadingCard, {
-                Type = "Success",
-                Title = "Auto-Login Berhasil!",
-                Message = "Key valid. Memuat script...",
-            })
-            task.wait(0.3)
-            Notification.Celebrate("SELAMAT DATANG!", "Auto-login berhasil!")
-            task.delay(3, function()
-                if loadingCard and loadingCard.Parent then loadingCard:Destroy() end
-            end)
-        else
-            Notification.Celebrate("AUTO-LOGIN BERHASIL!", "Key valid. Memuat script...")
-        end
-
-        task.wait(3)
+        Notification.KeyActivated()
+        task.wait(1.5)
         loadMainScript()
         autoLoggedIn = true
     else
-        if loadingCard then
-            Notification.UpdateLoading(loadingCard, {
-                Type = "Error",
-                Title = "Key Tidak Valid",
-                Message = "Key expired atau salah.\n" .. (msg or ""),
-            })
-            task.delay(3, function()
-                if loadingCard and loadingCard.Parent then loadingCard:Destroy() end
-            end)
-        else
-            Notification.Error("Key Tidak Valid", "Key expired atau salah.\n" .. (msg or ""), 5)
-        end
+        Notification.KeyNotActive()
         clearSavedKey()
     end
 end
 
+-- STEP 4: Kalau auto-login gagal, tampilkan UI input key
 if not autoLoggedIn then
-    task.wait(2)
-    Notification.Info("Masukkan Key", "Silakan masukkan key kamu.\nBelum punya? Klik BELI KEY.", 6)
+    task.wait(1.5)
     ShowKeyUI()
 end

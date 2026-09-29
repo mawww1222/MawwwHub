@@ -1,12 +1,9 @@
 --========================================================--
--- MAWWWHUB NOTIFICATION — SIMPLE (Perfect Center v2)
--- Pakai ViewportSize untuk center sempurna
+-- MAWWWHUB NOTIFICATION — BUG FIXED VERSION
+-- Perfect Center + Camera Nil Guard + Auto Resize
 --========================================================--
 local Notification = {}
 
---========================================================--
--- SERVICES
---========================================================--
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -15,16 +12,11 @@ local Workspace = game:GetService("Workspace")
 
 local Player = Players.LocalPlayer
 
---========================================================--
--- 🎨 ASSET ID FOTO
---========================================================--
 local ASSET_LOGO = "88250532753444"
 
---========================================================--
--- STATE
---========================================================--
 local notifyGui = nil
 local currentCard = nil
+local activeCards = {}
 
 --========================================================--
 -- HELPER
@@ -32,24 +24,23 @@ local currentCard = nil
 local function new(class, props)
     local inst = Instance.new(class)
     for k, v in pairs(props or {}) do
-        if k ~= "Parent" then
-            inst[k] = v
-        end
+        if k ~= "Parent" then inst[k] = v end
     end
-    if props and props.Parent then
-        inst.Parent = props.Parent
-    end
+    if props and props.Parent then inst.Parent = props.Parent end
     return inst
 end
 
--- 🎯 HITUNG CENTER PAKAI VIEWPORT
+-- 🐛 FIX #3: Camera nil guard
 local function getScreenCenter()
     local camera = Workspace.CurrentCamera
-    if camera then
-        local vp = camera.ViewportSize
-        return vp.X / 2, vp.Y / 2
+    if not camera then
+        return 640, 360  -- fallback aman
     end
-    return 640, 360  -- fallback
+    local vp = camera.ViewportSize
+    if not vp or vp.X <= 0 or vp.Y <= 0 then
+        return 640, 360
+    end
+    return vp.X / 2, vp.Y / 2
 end
 
 local function initGui()
@@ -62,8 +53,8 @@ local function initGui()
         Name = "MawwwNotify",
         ResetOnSpawn = false,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-        IgnoreGuiInset = true,   -- 🎯 true supaya full screen
-        DisplayOrder = 999,
+        IgnoreGuiInset = true,
+        DisplayOrder = 998,  -- 🐛 FIX: Turunin dari 999 biar key UI (9999) di atas
         Parent = CoreGui,
     })
 end
@@ -73,7 +64,9 @@ end
 --========================================================--
 local function createCard(opts)
     initGui()
+    if not notifyGui then return nil end
 
+    -- 🐛 FIX #2: Hapus card lama sebelum bikin baru
     if currentCard and currentCard.Parent then
         currentCard:Destroy()
     end
@@ -83,27 +76,20 @@ local function createCard(opts)
     local barColor = opts.BarColor or Color3.fromRGB(230, 60, 60)
     local showBar = opts.ShowBar ~= false
 
-    --======================================================--
-    -- 🎯 CARD — PAKAI ABSOLUTE OFFSET (CENTER SEMPURNA)
-    --======================================================--
     local cx, cy = getScreenCenter()
 
     local card = new("Frame", {
         Name = "Card",
         Size = UDim2.fromOffset(0, 0),
-        Position = UDim2.fromOffset(cx, cy),          -- 🎯 absolute center
-        AnchorPoint = Vector2.new(0.5, 0.5),          -- 🎯 anchor ke tengah
+        Position = UDim2.fromOffset(cx, cy),
+        AnchorPoint = Vector2.new(0.5, 0.5),
         BackgroundColor3 = Color3.fromRGB(12, 10, 18),
         BackgroundTransparency = 0.1,
         BorderSizePixel = 0,
         Parent = notifyGui,
     })
 
-    new("UICorner", {
-        CornerRadius = UDim.new(0, 12),
-        Parent = card,
-    })
-
+    new("UICorner", { CornerRadius = UDim.new(0, 12), Parent = card })
     new("UIStroke", {
         Color = Color3.fromRGB(40, 30, 60),
         Thickness = 1.5,
@@ -111,9 +97,6 @@ local function createCard(opts)
         Parent = card,
     })
 
-    --======================================================--
-    -- FOTO
-    --======================================================--
     local logoFrame = new("Frame", {
         Name = "LogoFrame",
         Size = UDim2.new(1, 0, 0, 120),
@@ -133,9 +116,6 @@ local function createCard(opts)
         Parent = logoFrame,
     })
 
-    --======================================================--
-    -- TEXT STATUS
-    --======================================================--
     new("TextLabel", {
         Name = "StatusText",
         Size = UDim2.new(1, -20, 0, 20),
@@ -149,9 +129,6 @@ local function createCard(opts)
         Parent = card,
     })
 
-    --======================================================--
-    -- RED BAR
-    --======================================================--
     local barBackground = new("Frame", {
         Name = "BarBackground",
         Size = UDim2.new(1, -20, 0, 4),
@@ -173,11 +150,9 @@ local function createCard(opts)
     })
     new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = redBar })
 
-    --======================================================--
-    -- 🎯 RESIZE LISTENER (kalau layar berubah/rotate)
-    --======================================================--
-    local resizeConn
+    -- 🐛 FIX: Auto re-center saat layar resize
     local camera = Workspace.CurrentCamera
+    local resizeConn
     if camera then
         resizeConn = camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
             if card and card.Parent then
@@ -187,18 +162,15 @@ local function createCard(opts)
         end)
     end
 
-    --======================================================--
-    -- POP-IN ANIMATION
-    --======================================================--
+    -- Pop-in
     task.delay(0.05, function()
+        if not card.Parent then return end
         TweenService:Create(card, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
             Size = UDim2.fromOffset(220, 190),
         }):Play()
     end)
 
-    --======================================================--
-    -- RED BAR ANIMATION
-    --======================================================--
+    -- Red bar animation
     local barLoop
     if showBar then
         barLoop = RunService.RenderStepped:Connect(function()
@@ -206,8 +178,7 @@ local function createCard(opts)
                 barLoop:Disconnect()
                 return
             end
-            local posX = redBar.Position.X.Scale
-            posX = posX + 0.015
+            local posX = redBar.Position.X.Scale + 0.015
             if posX > 1 then posX = -0.2 end
             redBar.Position = UDim2.new(posX, 0, 0, 0)
         end)
@@ -216,9 +187,7 @@ local function createCard(opts)
         redBar.Position = UDim2.new(0, 0, 0, 0)
     end
 
-    --======================================================--
-    -- AUTO DISMISS
-    --======================================================--
+    -- Auto dismiss
     if duration > 0 then
         task.delay(duration, function()
             if not card.Parent then return end
@@ -237,6 +206,13 @@ local function createCard(opts)
     end
 
     currentCard = card
+    table.insert(activeCards, card)
+    card.Destroying:Connect(function()
+        for i, c in ipairs(activeCards) do
+            if c == card then table.remove(activeCards, i) break end
+        end
+    end)
+
     return card
 end
 
@@ -275,59 +251,35 @@ end
 
 function Notification.SetText(text)
     if currentCard and currentCard.Parent then
-        local statusText = currentCard:FindFirstChild("StatusText")
-        if statusText then statusText.Text = text end
+        local s = currentCard:FindFirstChild("StatusText")
+        if s then s.Text = text end
     end
 end
 
 function Notification.SetColor(color)
     if currentCard and currentCard.Parent then
-        local statusText = currentCard:FindFirstChild("StatusText")
-        if statusText then statusText.TextColor3 = color end
+        local s = currentCard:FindFirstChild("StatusText")
+        if s then s.TextColor3 = color end
     end
 end
 
---========================================================--
--- COMPATIBILITY
---========================================================--
+-- Compatibility
 function Notification.WelcomeImage(opts)
     opts = opts or {}
-    local hasKey = opts.HasKey or false
-    if hasKey then
+    if opts.HasKey then
         return Notification.Loading("VERIFYING KEY...", 5)
     else
         return Notification.Loading("LOADING...", 6)
     end
 end
 
-function Notification.Celebrate(title, message)
-    return Notification.KeyActivated()
-end
-
-function Notification.Success(title, message, duration)
-    return Notification.KeyActivated()
-end
-
-function Notification.Error(title, message, duration)
-    return Notification.KeyNotActive()
-end
-
-function Notification.Info(title, message, duration)
-    return Notification.Loading("LOADING...", duration or 4)
-end
-
-function Notification.Warning(title, message, duration)
-    return Notification.Loading("PLEASE WAIT...", duration or 4)
-end
-
-function Notification.Premium(title, message, duration)
-    return Notification.Loading("LOADING...", duration or 5)
-end
-
-function Notification.Show(opts)
-    return createCard(opts or {})
-end
-
+function Notification.Celebrate() return Notification.KeyActivated() end
+function Notification.Success() return Notification.KeyActivated() end
+function Notification.Error() return Notification.KeyNotActive() end
+function Notification.Info(t, m, d) return Notification.Loading("LOADING...", d or 4) end
+function Notification.Warning(t, m, d) return Notification.Loading("PLEASE WAIT...", d or 4) end
+function Notification.Premium(t, m, d) return Notification.Loading("LOADING...", d or 5) end
+function Notification.Show(opts) return createCard(opts or {}) end
 function Notification.ShowImage(opts)
     opts = opts or {}
     return Notification.Loading(opts.Text or "LOADING...", opts.Duration or 5)
@@ -335,12 +287,11 @@ end
 
 function Notification.UpdateLoading(card, opts)
     if not card or not card.Parent then return end
-    local statusText = card:FindFirstChild("StatusText")
-    if statusText and opts and opts.Title then
-        statusText.Text = opts.Title
-    end
+    local s = card:FindFirstChild("StatusText")
+    if s and opts and opts.Title then s.Text = opts.Title end
 end
 
+-- 🐛 FIX #2: ClearAll yang benar
 function Notification.ClearAll()
     if notifyGui then
         for _, child in ipairs(notifyGui:GetChildren()) do
@@ -350,6 +301,7 @@ function Notification.ClearAll()
         end
     end
     currentCard = nil
+    activeCards = {}
 end
 
 return Notification

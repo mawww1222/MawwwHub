@@ -1,5 +1,5 @@
 --========================================================--
--- MAWWWHUB KEY GATE — Simple Notification Edition
+-- MAWWWHUB KEY GATE — Fixed Version
 --========================================================--
 local BASE = "https://raw.githubusercontent.com/mawww1222/MawwwHub/main/"
 
@@ -24,7 +24,7 @@ local KEY_LOGO_ID = "88250532753444"
 local function getSavedKey()
     if isfile and isfile("MawwwHub/key.txt") then
         local ok, k = pcall(readfile, "MawwwHub/key.txt")
-        if ok then return k end
+        if ok and k and k ~= "" then return k end
     end
     return nil
 end
@@ -52,12 +52,19 @@ end
 -- KEY UI — POSISI TENGAH LAYAR
 --========================================================--
 local function ShowKeyUI()
+    -- 🎯 Hapus notif dulu biar gak nutupin key UI
+    if Notification.ClearAll then
+        pcall(function() Notification.ClearAll() end)
+    end
+    -- Tambah delay kecil biar notif sempat hilang
+    task.wait(0.3)
+
     local gui = Instance.new("ScreenGui")
     gui.Name = "MawwwKeyUI"
     gui.ResetOnSpawn = false
     gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     gui.IgnoreGuiInset = true
-    gui.DisplayOrder = 500
+    gui.DisplayOrder = 9999  -- 🎯 paling atas biar gak ketutup
     pcall(function() gui.Parent = CoreGui end)
 
     -- Overlay gelap
@@ -69,57 +76,7 @@ local function ShowKeyUI()
     overlay.ZIndex = 0
     overlay.Parent = gui
 
-    TweenService:Create(overlay, TweenInfo.new(0.5), { BackgroundTransparency = 0.4 }):Play()
-
-    -- Blob 1
-    local blob1 = Instance.new("Frame")
-    blob1.Size = UDim2.fromOffset(400, 400)
-    blob1.Position = UDim2.new(0.2, 0, 0.3, 0)
-    blob1.BackgroundColor3 = Color3.fromRGB(180, 110, 255)
-    blob1.BackgroundTransparency = 0.85
-    blob1.BorderSizePixel = 0
-    blob1.ZIndex = 1
-    blob1.Parent = gui
-    Instance.new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = blob1 })
-
-    -- Blob 2
-    local blob2 = Instance.new("Frame")
-    blob2.Size = UDim2.fromOffset(350, 350)
-    blob2.Position = UDim2.new(0.7, 0, 0.6, 0)
-    blob2.BackgroundColor3 = Color3.fromRGB(80, 210, 255)
-    blob2.BackgroundTransparency = 0.85
-    blob2.BorderSizePixel = 0
-    blob2.ZIndex = 1
-    blob2.Parent = gui
-    Instance.new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = blob2 })
-
-    task.spawn(function()
-        while blob1.Parent do
-            TweenService:Create(blob1, TweenInfo.new(4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                Position = UDim2.new(0.4, 0, 0.5, 0),
-            }):Play()
-            task.wait(4)
-            if not blob1.Parent then break end
-            TweenService:Create(blob1, TweenInfo.new(4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                Position = UDim2.new(0.2, 0, 0.3, 0),
-            }):Play()
-            task.wait(4)
-        end
-    end)
-
-    task.spawn(function()
-        while blob2.Parent do
-            TweenService:Create(blob2, TweenInfo.new(5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                Position = UDim2.new(0.5, 0, 0.3, 0),
-            }):Play()
-            task.wait(5)
-            if not blob2.Parent then break end
-            TweenService:Create(blob2, TweenInfo.new(5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                Position = UDim2.new(0.7, 0, 0.6, 0),
-            }):Play()
-            task.wait(5)
-        end
-    end)
+    TweenService:Create(overlay, TweenInfo.new(0.5), { BackgroundTransparency = 0.5 }):Play()
 
     --======================================================--
     -- FRAME UTAMA (TENGAH LAYAR)
@@ -144,7 +101,9 @@ local function ShowKeyUI()
         }):Play()
     end)
 
-    Instance.new("UICorner", { CornerRadius = UDim.new(0, 16), Parent = frame })
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 16)
+    corner.Parent = frame
 
     local stroke = Instance.new("UIStroke")
     stroke.Color = Color3.fromRGB(180, 110, 255)
@@ -204,51 +163,12 @@ local function ShowKeyUI()
             TweenService:Create(logoFrame, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
                 Position = UDim2.new(0.5, -65, 0, 12),
             }):Play()
-            TweenService:Create(logoGlow, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                ImageTransparency = 0.3,
-            }):Play()
             task.wait(1.2)
             if not logoFrame.Parent then break end
             TweenService:Create(logoFrame, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
                 Position = UDim2.new(0.5, -65, 0, 20),
             }):Play()
-            TweenService:Create(logoGlow, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                ImageTransparency = 0.5,
-            }):Play()
             task.wait(1.2)
-        end
-    end)
-
-    -- Sparkle
-    task.spawn(function()
-        local sparkleIds = {"rbxassetid://5014978988", "rbxassetid://5014979922"}
-        while logoFrame.Parent do
-            task.wait(0.4)
-            if not logoFrame.Parent then break end
-            task.spawn(function()
-                local angle = math.random() * math.pi * 2
-                local radius = 75
-                local sparkle = Instance.new("ImageLabel")
-                sparkle.Size = UDim2.fromOffset(16, 16)
-                sparkle.Position = UDim2.new(0.5, -8, 0.5, -8)
-                sparkle.BackgroundTransparency = 1
-                sparkle.Image = sparkleIds[math.random(1, #sparkleIds)]
-                sparkle.ImageColor3 = math.random() > 0.5 and Color3.fromRGB(180, 110, 255) or Color3.fromRGB(255, 255, 255)
-                sparkle.ZIndex = 13
-                sparkle.Parent = logoFrame
-
-                local endX = 65 + math.cos(angle) * radius
-                local endY = 65 + math.sin(angle) * radius
-
-                local tween = TweenService:Create(sparkle, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    Position = UDim2.fromOffset(endX - 8, endY - 8),
-                    ImageTransparency = 1,
-                    Size = UDim2.fromOffset(6, 6),
-                    Rotation = math.random(180, 720),
-                })
-                tween:Play()
-                tween.Completed:Connect(function() sparkle:Destroy() end)
-            end)
         end
     end)
 
@@ -261,7 +181,6 @@ local function ShowKeyUI()
     title.TextSize = 24
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.Text = "MAWWWHUB"
-    title.TextTransparency = 1
     title.ZIndex = 11
     title.Parent = frame
 
@@ -274,10 +193,6 @@ local function ShowKeyUI()
     titleGrad.Rotation = 90
     titleGrad.Parent = title
 
-    task.delay(0.5, function()
-        TweenService:Create(title, TweenInfo.new(0.5), { TextTransparency = 0 }):Play()
-    end)
-
     local sub = Instance.new("TextLabel")
     sub.Size = UDim2.new(1, -20, 0, 16)
     sub.Position = UDim2.fromOffset(10, 190)
@@ -286,20 +201,14 @@ local function ShowKeyUI()
     sub.TextSize = 11
     sub.TextColor3 = Color3.fromRGB(200, 200, 210)
     sub.Text = "Masukkan key untuk mengakses script"
-    sub.TextTransparency = 1
     sub.ZIndex = 11
     sub.Parent = frame
-
-    task.delay(0.6, function()
-        TweenService:Create(sub, TweenInfo.new(0.5), { TextTransparency = 0 }):Play()
-    end)
 
     -- INPUT
     local inputHolder = Instance.new("Frame")
     inputHolder.Size = UDim2.new(1, -20, 0, 40)
     inputHolder.Position = UDim2.fromOffset(10, 218)
     inputHolder.BackgroundColor3 = Color3.fromRGB(28, 22, 38)
-    inputHolder.BackgroundTransparency = 1
     inputHolder.BorderSizePixel = 0
     inputHolder.ZIndex = 11
     inputHolder.Parent = frame
@@ -308,7 +217,6 @@ local function ShowKeyUI()
     local inStroke = Instance.new("UIStroke")
     inStroke.Color = Color3.fromRGB(180, 110, 255)
     inStroke.Thickness = 1.5
-    inStroke.Transparency = 1
     inStroke.Parent = inputHolder
 
     local input = Instance.new("TextBox")
@@ -321,22 +229,8 @@ local function ShowKeyUI()
     input.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
     input.Text = ""
     input.ClearTextOnFocus = false
-    input.TextTransparency = 1
     input.ZIndex = 12
     input.Parent = inputHolder
-
-    task.delay(0.7, function()
-        TweenService:Create(inputHolder, TweenInfo.new(0.4), { BackgroundTransparency = 0 }):Play()
-        TweenService:Create(inStroke, TweenInfo.new(0.4), { Transparency = 0 }):Play()
-        TweenService:Create(input, TweenInfo.new(0.4), { TextTransparency = 0 }):Play()
-    end)
-
-    input.Focused:Connect(function()
-        TweenService:Create(inStroke, TweenInfo.new(0.2), { Color = Color3.fromRGB(80, 210, 255), Thickness = 2 }):Play()
-    end)
-    input.FocusLost:Connect(function()
-        TweenService:Create(inStroke, TweenInfo.new(0.2), { Color = Color3.fromRGB(180, 110, 255), Thickness = 1.5 }):Play()
-    end)
 
     -- STATUS
     local status = Instance.new("TextLabel")
@@ -347,7 +241,6 @@ local function ShowKeyUI()
     status.TextSize = 10
     status.TextColor3 = Color3.fromRGB(255, 100, 100)
     status.Text = ""
-    status.TextTransparency = 1
     status.ZIndex = 11
     status.Parent = frame
 
@@ -356,13 +249,11 @@ local function ShowKeyUI()
     verifyBtn.Size = UDim2.new(1, -20, 0, 42)
     verifyBtn.Position = UDim2.fromOffset(10, 285)
     verifyBtn.BackgroundColor3 = Color3.fromRGB(180, 110, 255)
-    verifyBtn.BackgroundTransparency = 1
     verifyBtn.BorderSizePixel = 0
     verifyBtn.Font = Enum.Font.GothamBold
     verifyBtn.TextSize = 14
     verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     verifyBtn.Text = "🔓 VERIFY KEY"
-    verifyBtn.TextTransparency = 1
     verifyBtn.AutoButtonColor = false
     verifyBtn.ZIndex = 11
     verifyBtn.Parent = frame
@@ -376,22 +267,16 @@ local function ShowKeyUI()
     vGrad.Rotation = 45
     vGrad.Parent = verifyBtn
 
-    task.delay(0.85, function()
-        TweenService:Create(verifyBtn, TweenInfo.new(0.4), { BackgroundTransparency = 0, TextTransparency = 0 }):Play()
-    end)
-
     -- BELI + CLEAR BUTTON
     local buyBtn = Instance.new("TextButton")
     buyBtn.Size = UDim2.new(0.5, -15, 0, 36)
     buyBtn.Position = UDim2.fromOffset(10, 340)
     buyBtn.BackgroundColor3 = Color3.fromRGB(40, 30, 55)
-    buyBtn.BackgroundTransparency = 1
     buyBtn.BorderSizePixel = 0
     buyBtn.Font = Enum.Font.GothamBold
     buyBtn.TextSize = 11
     buyBtn.TextColor3 = Color3.fromRGB(180, 110, 255)
     buyBtn.Text = "🔗 BELI KEY"
-    buyBtn.TextTransparency = 1
     buyBtn.AutoButtonColor = false
     buyBtn.ZIndex = 11
     buyBtn.Parent = frame
@@ -400,20 +285,17 @@ local function ShowKeyUI()
     local bStroke = Instance.new("UIStroke")
     bStroke.Color = Color3.fromRGB(180, 110, 255)
     bStroke.Thickness = 1
-    bStroke.Transparency = 1
     bStroke.Parent = buyBtn
 
     local clearBtn = Instance.new("TextButton")
     clearBtn.Size = UDim2.new(0.5, -15, 0, 36)
     clearBtn.Position = UDim2.new(0.5, 5, 0, 340)
     clearBtn.BackgroundColor3 = Color3.fromRGB(40, 30, 55)
-    clearBtn.BackgroundTransparency = 1
     clearBtn.BorderSizePixel = 0
     clearBtn.Font = Enum.Font.GothamBold
     clearBtn.TextSize = 11
     clearBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
     clearBtn.Text = "🗑️ CLEAR SAVED"
-    clearBtn.TextTransparency = 1
     clearBtn.AutoButtonColor = false
     clearBtn.ZIndex = 11
     clearBtn.Parent = frame
@@ -422,15 +304,7 @@ local function ShowKeyUI()
     local cStroke = Instance.new("UIStroke")
     cStroke.Color = Color3.fromRGB(255, 100, 100)
     cStroke.Thickness = 1
-    cStroke.Transparency = 1
     cStroke.Parent = clearBtn
-
-    task.delay(1, function()
-        TweenService:Create(buyBtn, TweenInfo.new(0.4), { BackgroundTransparency = 0, TextTransparency = 0 }):Play()
-        TweenService:Create(bStroke, TweenInfo.new(0.4), { Transparency = 0 }):Play()
-        TweenService:Create(clearBtn, TweenInfo.new(0.4), { BackgroundTransparency = 0, TextTransparency = 0 }):Play()
-        TweenService:Create(cStroke, TweenInfo.new(0.4), { Transparency = 0 }):Play()
-    end)
 
     --======================================================--
     -- HANDLERS
@@ -444,7 +318,6 @@ local function ShowKeyUI()
         local key = input.Text
         status.Text = "⏳ Checking..."
         status.TextColor3 = Color3.fromRGB(200, 200, 100)
-        status.TextTransparency = 0
         verifyBtn.Text = "⏳ CHECKING..."
 
         task.wait(0.2)
@@ -455,34 +328,24 @@ local function ShowKeyUI()
             status.TextColor3 = Color3.fromRGB(100, 255, 150)
             verifyBtn.Text = "✅ SUCCESS"
 
-            -- Pop-out + notif sukses
+            Notification.KeyActivated()
+
+            saveKey(key)
+
+            -- Close key UI dulu
             TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
                 Size = UDim2.fromOffset(0, 0),
             }):Play()
             TweenService:Create(overlay, TweenInfo.new(0.4), { BackgroundTransparency = 1 }):Play()
 
-            Notification.KeyActivated()
-
-            saveKey(key)
-            task.wait(2.5)
+            task.wait(1)
             gui:Destroy()
+            task.wait(2)
             loadMainScript()
         else
             status.Text = msg
             status.TextColor3 = Color3.fromRGB(255, 100, 100)
             verifyBtn.Text = "🔓 VERIFY KEY"
-
-            -- Shake
-            task.spawn(function()
-                local origPos = frame.Position
-                for i = 1, 3 do
-                    TweenService:Create(frame, TweenInfo.new(0.05), { Position = origPos + UDim2.fromOffset(10, 0) }):Play()
-                    task.wait(0.05)
-                    TweenService:Create(frame, TweenInfo.new(0.05), { Position = origPos - UDim2.fromOffset(10, 0) }):Play()
-                    task.wait(0.05)
-                end
-                TweenService:Create(frame, TweenInfo.new(0.1), { Position = origPos }):Play()
-            end)
 
             Notification.KeyNotActive()
             isVerifying = false
@@ -495,7 +358,6 @@ local function ShowKeyUI()
             setclipboard(link)
             status.Text = "🔗 Link beli dicopy!"
             status.TextColor3 = Color3.fromRGB(100, 200, 255)
-            status.TextTransparency = 0
         end
     end)
 
@@ -503,7 +365,6 @@ local function ShowKeyUI()
         clearSavedKey()
         status.Text = "🗑️ Saved key dihapus!"
         status.TextColor3 = Color3.fromRGB(255, 200, 100)
-        status.TextTransparency = 0
     end)
 
     input.FocusLost:Connect(function(enter)
@@ -544,19 +405,17 @@ end
 -- 🚀 MAIN FLOW
 --========================================================--
 
--- STEP 1: Tampilkan loading notif
+-- STEP 1: Loading notif
 local hasSavedKey = getSavedKey() ~= nil
-
 if hasSavedKey then
-    Notification.Loading("VERIFYING KEY...", 5)
+    Notification.Loading("VERIFYING KEY...", 4)
 else
-    Notification.Loading("LOADING...", 5)
+    Notification.Loading("LOADING...", 3)
 end
 
--- STEP 2: Tunggu sebentar
-task.wait(2)
+task.wait(1.5)
 
--- STEP 3: Auto-login
+-- STEP 2: Auto-login
 local savedKey = getSavedKey()
 local autoLoggedIn = false
 
@@ -571,11 +430,12 @@ if savedKey then
     else
         Notification.KeyNotActive()
         clearSavedKey()
+        task.wait(1.5)
     end
 end
 
--- STEP 4: Kalau auto-login gagal, tampilkan UI input key
+-- STEP 3: Kalau bukan auto-login → tampilkan UI input key
 if not autoLoggedIn then
-    task.wait(1.5)
+    task.wait(0.5)
     ShowKeyUI()
 end

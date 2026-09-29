@@ -1,10 +1,10 @@
 --========================================================--
--- MAWWWHUB KEY SYSTEM (Railway API)
+-- MAWWWHUB KEY SYSTEM (Railway API) — BUG FIXED
 --========================================================--
 local KeySystem = {}
 
 --========================================================--
--- URL RAILWAY KAMU
+-- URL RAILWAY
 --========================================================--
 local BASE_URL = "https://mawww-key-server-production.up.railway.app"
 KeySystem.BASE_URL = BASE_URL
@@ -13,47 +13,19 @@ KeySystem.BASE_URL = BASE_URL
 -- SAVED KEY HELPERS
 --========================================================--
 function KeySystem:HasSavedKey()
-    if isfile and isfile("MawwwHub/key.txt") then
-        local ok, k = pcall(readfile, "MawwwHub/key.txt")
-        if ok and k and k ~= "" then
-            return true, k
+    local ok, result = pcall(function()
+        if isfile and isfile("MawwwHub/key.txt") then
+            local k = readfile("MawwwHub/key.txt")
+            if k and k ~= "" then return true, k end
         end
-    end
+        return false, nil
+    end)
+    if ok then return result end
     return false, nil
 end
 
-function KeySystem:GetKeyInfo(userKey)
-    if not userKey or userKey == "" then
-        return { ok = false, msg = "Key kosong" }
-    end
-    userKey = tostring(userKey):gsub("%s+", "")
-
-    local hwid = KeySystem:GetHWID()
-    local HttpService = game:GetService("HttpService")
-    local url = string.format(
-        "%s/api/validate?key=%s&hwid=%s",
-        BASE_URL,
-        HttpService:UrlEncode(userKey),
-        HttpService:UrlEncode(hwid)
-    )
-
-    local ok, response = pcall(function() return game:HttpGet(url) end)
-    if not ok or not response then
-        return { ok = false, msg = "Server offline" }
-    end
-
-    local decodeOk, data = pcall(function()
-        return HttpService:JSONDecode(response)
-    end)
-    if not decodeOk or type(data) ~= "table" then
-        return { ok = false, msg = "Response tidak valid" }
-    end
-
-    return data
-end
-
 --========================================================--
--- GENERATE HWID
+-- HWID
 --========================================================--
 function KeySystem:GetHWID()
     local ok, hwid = pcall(function()
@@ -64,8 +36,11 @@ function KeySystem:GetHWID()
     end)
     if ok and hwid and hwid ~= "" then return hwid end
 
-    local Platform = game:GetService("UserInputService").TouchEnabled and "M" or "P"
-    return tostring(game.Players.LocalPlayer.UserId) .. "-" .. Platform
+    local platform = "P"
+    pcall(function()
+        platform = game:GetService("UserInputService").TouchEnabled and "M" or "P"
+    end)
+    return tostring(game.Players.LocalPlayer.UserId) .. "-" .. platform
 end
 
 --========================================================--
@@ -77,26 +52,29 @@ function KeySystem:ValidateKey(userKey)
     end
 
     userKey = tostring(userKey):gsub("%s+", "")
-    local hwid = KeySystem:GetHWID()
-    local HttpService = game:GetService("HttpService")
+
+    local hwid = self:GetHWID()
+    local httpService = game:GetService("HttpService")
 
     local url = string.format(
         "%s/api/validate?key=%s&hwid=%s",
         BASE_URL,
-        HttpService:UrlEncode(userKey),
-        HttpService:UrlEncode(hwid)
+        httpService:UrlEncode(userKey),
+        httpService:UrlEncode(hwid)
     )
 
     local ok, response = pcall(function()
         return game:HttpGet(url)
     end)
+
     if not ok or not response then
         return false, "Server offline, coba lagi."
     end
 
     local decodeOk, data = pcall(function()
-        return HttpService:JSONDecode(response)
+        return httpService:JSONDecode(response)
     end)
+
     if not decodeOk or type(data) ~= "table" then
         return false, "Response tidak valid."
     end
@@ -108,16 +86,14 @@ function KeySystem:ValidateKey(userKey)
     end
 end
 
---========================================================--
--- GET BUY LINK
---========================================================--
+function KeySystem:GetKeyInfo(userKey)
+    return self:ValidateKey(userKey)
+end
+
 function KeySystem:GetBuyLink()
     return BASE_URL
 end
 
---========================================================--
--- GET INFO (untuk debug)
---========================================================--
 function KeySystem:GetInfo()
     local ok, response = pcall(function()
         return game:HttpGet(BASE_URL .. "/api/info")

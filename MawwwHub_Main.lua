@@ -18,12 +18,17 @@ local TeleportService  = game:GetService("TeleportService")
 local Player = Players.LocalPlayer
 
 --========================================================--
--- 🎨 ASSETS — GANTI ASSET ID DI SINI
+-- 🎨 ASSETS — REKOMENDASI FOTO
 --========================================================--
 local ASSETS = {
-    ToggleIcon   = 88250532753444,        -- Icon toggle floating
-    HomeBanner   = 94736003254558,        -- Banner Home (opsional)
-    MawwwHubLogo = 88250532753444,        -- 🎯 Foto MawwwHub di Home tab (GANTI sesuai kebutuhan)
+    -- Icon toggle floating + window header
+    ToggleIcon   = 88250532753444,
+
+    -- 🎯 FOTO HOME TAB (rekomendasi: pakai icon MawwwHub kamu sendiri)
+    HomePhoto    = 88250532753444,
+
+    -- Banner Home (opsional, di bawah foto)
+    HomeBanner   = 94736003254558,
 }
 
 --========================================================--
@@ -133,13 +138,13 @@ local Tabs = {
 }
 
 --========================================================--
--- 🏠 HOME TAB (dengan FOTO MawwwHub)
+-- 🏠 HOME TAB
 --========================================================--
 local HomeLeft  = Tabs.Home:AddLeftGroupbox("Welcome", "sparkles")
 local HomeRight = Tabs.Home:AddRightGroupbox("Info", "info")
 
--- 🎯 FOTO MAWWWHUB di Home tab
-HomeLeft:AddImage(ASSETS.MawwwHubLogo, {
+-- 🎯 FOTO MAWWWHUB
+HomeLeft:AddImage(ASSETS.HomePhoto, {
     Text = "",
     Height = 150,
 })
